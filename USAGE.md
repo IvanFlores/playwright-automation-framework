@@ -97,10 +97,16 @@ Git rules (`git-standards`): branches `test/<scope>` or `fix/<scope>`; commit su
 `feat`/`fix` commit per branch; PRs into `main` with `gh`; stage files explicitly.
 
 ## 8. CI
-`.github/workflows/playwright.yml` runs on pushes and PRs to `main`: installs dependencies and
-browsers, runs `npx playwright test` and uploads `playwright-report/` as an artifact (30 days).
-It needs `BASE_URL`, `TEST_USERNAME` and `TEST_PASSWORD` in the job environment and a GAD
-instance reachable from the runner. Neither is configured yet, so CI only works after you add them.
+`.github/workflows/playwright.yml` runs on pushes and PRs to `main`, and manually
+(`workflow_dispatch`). It needs no repository secrets:
+
+1. Starts GAD as a service container (`jaktestowac/gad:2.9.0`) on `http://localhost:3001` (`BASE_URL`).
+2. Registers a throwaway user through `POST /api/users`, with a random password masked in the logs,
+   and exports it as `TEST_USERNAME` / `TEST_PASSWORD`.
+3. Installs Chromium and runs `npx playwright test --project=chromium --project=api`.
+4. Uploads `playwright-report/` as the `playwright-report` artifact (30 days).
+
+To test against another GAD version, change the image tag in the workflow.
 
 ## 9. BDD layer (Cucumber)
 Gherkin scenarios in `features/` reuse the page objects and `ApiClient`, so both styles share one code base.
