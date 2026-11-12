@@ -15,6 +15,33 @@ type Fixtures = {
 
 /** Import `test` and `expect` from here (`@fixtures`), not from @playwright/test, in every spec. */
 export const test = base.extend<Fixtures>({
+  // WebKit applies the app's CSP `upgrade-insecure-requests` to localhost (Chromium/Firefox don't),
+  // rewriting every request to https:// on a plain-HTTP server, so nothing loads and forms never submit.
+  // Strip that directive for WebKit when the app is served over HTTP.
+  context: async ({ context, browserName, baseURL }, use) => {
+    if (browserName === 'webkit' && baseURL?.startsWith('http://')) {
+      await context.route(`${new URL(baseURL).origin}/**`, async (route) => {
+        // CSP only takes effect on documents; let every other request through untouched.
+        if (route.request().resourceType() !== 'document') {
+          return route.continue();
+        }
+        try {
+          const response = await route.fetch();
+          const headers = response.headers();
+          const csp = headers['content-security-policy'];
+          if (csp) {
+            headers['content-security-policy'] = csp.replace(/;?\s*upgrade-insecure-requests/i, '');
+          }
+          await route.fulfill({ response, headers });
+        } catch {
+          // The navigation was superseded or the context closed mid-request; nothing to fulfil.
+        }
+      });
+    }
+    await use(context);
+    await context.unrouteAll({ behavior: 'ignoreErrors' });
+  },
+
   // Logs in with the default test account; Playwright discards the context after each test.
   authenticatedPage: async ({ page }, use) => {
     const lp = new LoginPage(page);

@@ -39,7 +39,16 @@ export default defineConfig({
     {
       name: 'firefox',
       testIgnore: ['api/**'],
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        launchOptions: {
+          firefoxUserPrefs: {
+            // Headed Firefox on Windows stops painting windows covered by other windows,
+            // which makes clicks hang. Keep rendering them as if visible.
+            'widget.windows.window_occlusion_tracking.enabled': false,
+          },
+        },
+      },
     },
     {
       name: 'webkit',
