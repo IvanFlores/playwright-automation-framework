@@ -1,7 +1,13 @@
-# Playwright Automation Template
+# Playwright Automation Framework
 
-A generic, opinionated starter for UI + API test automation with
-[Playwright Test](https://playwright.dev) and TypeScript.
+UI + API test automation for **GAD (GUI API Demo)** built with
+[Playwright Test](https://playwright.dev) and TypeScript, developed in the Jalasoft Web Automation
+course. It uses the Page Object Model, custom fixtures and TC-numbered specs. Its architecture and git
+conventions are enforced by Claude Code skills (see [AI skills](#ai-skills-claude-code-claudeskills)).
+
+- UI tests run against the GAD instance in `BASE_URL` (e.g. `http://localhost:3001`).
+- API tests run against `API_BASE_URL` (default: JSONPlaceholder).
+- How-to details: [USAGE.md](USAGE.md). Architecture decisions: [docs/decisions](docs/decisions).
 
 ## Structure
 
@@ -21,7 +27,7 @@ tests/
 docs/decisions/        # ADRs (required before adding a hub mode)
 docs/evidence/         # skill execution reports and screenshots
 .claude/skills/        # AI skills (see "AI skills" below)
-.github/workflows/     # CI example
+.github/workflows/     # CI (Playwright run + HTML report artifact)
 ```
 
 ## UI test cases (GAD, `BASE_URL`)
@@ -48,13 +54,18 @@ docs/evidence/         # skill execution reports and screenshots
 
 ## Getting started
 
+Prerequisites: Node.js 20+, a running GAD instance, and a GAD account for the
+`authenticatedPage` fixture.
+
 ```bash
 npm install
 npx playwright install
-cp .env.example .env
-npm test
+cp .env.example .env    # set BASE_URL, TEST_USERNAME, TEST_PASSWORD
+npm run test:chromium
 npm run report
 ```
+
+`src/config/Env.ts` stops the run with a clear message if a required variable is missing.
 
 ## Conventions
 
@@ -71,13 +82,17 @@ npm run report
 ## Adding a page
 
 1. Create `src/ui/pages/MyPage.ts` extending `BasePage` (getters + async actions only).
-2. Register it in `src/fixtures/index.ts`.
-3. Use it in a spec: `test('...', async ({ myPage }) => { ... })`.
+2. Register it in `src/fixtures/index.ts` (depend on `authenticatedPage` if it needs login).
+3. Add `tests/ui/<suite>/<feature>/TC{N}-<name>.spec.ts`:
+   `test('TC{N}: …', { tag: '@smoke' }, async ({ myPage }) => { await test.step(…) })`.
+4. Run the `automation-architect` skill ("apply architecture") to check the result.
 
 ## Authentication
 
-Enable the `setup` project and `storageState` lines in `playwright.config.ts`,
-adapt `tests/setup/auth.setup.ts`, and set `USER_NAME` / `USER_PASSWORD`.
+Each test logs in through the `authenticatedPage` fixture with `TEST_USERNAME` / `TEST_PASSWORD`.
+To log in once instead, add a `setup` project (`testMatch: /.*\.setup\.ts/`) to
+`playwright.config.ts` and point the UI projects' `storageState` at the file written by
+`tests/setup/auth.setup.ts`.
 
 ## BDD layer (Cucumber)
 
