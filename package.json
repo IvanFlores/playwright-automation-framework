@@ -1,0 +1,42 @@
+{
+  "name": "playwright-automation-template",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Generic Playwright + TypeScript test automation framework template",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:api": "playwright test --project=api",
+    "test:chromium": "playwright test --project=chromium",
+    "report": "playwright show-report",
+    "codegen": "playwright codegen",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "bdd": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.cjs",
+    "bdd:smoke": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.cjs --profile smoke",
+    "bdd:regression": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.cjs --profile regression",
+    "bdd:api": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.cjs --profile api",
+    "bdd:headed": "HEADLESS=false NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.cjs",
+    "bdd:dry-run": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.cjs --dry-run"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^11.0.0",
+    "@eslint/js": "^9.0.0",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^22.0.0",
+    "dotenv": "^16.4.5",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}
