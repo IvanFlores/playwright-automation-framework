@@ -145,6 +145,25 @@ candidate for a future TC.
 ![HTML report summary](screenshots/20-html-report-summary.png)
 ![TC6 steps in the HTML report](screenshots/21-html-report-TC6-steps.png)
 
+### 4.1 CI run on main (GitHub Actions)
+
+Before PR #4, every CI run failed at startup: the workflow had no `BASE_URL` / `TEST_USERNAME` /
+`TEST_PASSWORD`, and the tests targeted a GAD on the developer machine that GitHub runners cannot reach.
+PR #4 made CI self-contained:
+
+- GAD runs as a service container (`jaktestowac/gad:2.9.0`).
+- A throwaway user is registered via `POST /api/users`; its password is random and masked in the logs.
+- The job runs Chromium plus the API project.
+
+| Item | Value |
+|---|---|
+| Run | [#11](https://github.com/IvanFlores/playwright-automation-framework/actions/runs/43143484958) — push to `main` (merge of PR #4, `58b8414`) |
+| Duration | 1m 40s |
+| Result | **Success — 9 passed** (TC1–TC7 Chromium + 2 API), 0 failed |
+
+![CI run summary](screenshots/22-ci-run-summary.png)
+![CI job steps](screenshots/23-ci-job-steps.png)
+
 ## 5. Screenshots of written files
 
 All in [`screenshots/`](screenshots/):
@@ -161,5 +180,6 @@ All in [`screenshots/`](screenshots/):
 | TC1–TC7 spec files | `09-spec-TC1.png` … `15-spec-TC7.png` |
 | BEFORE report | `16-before-report.png` |
 | HTML report | `20-html-report-summary.png`, `21-html-report-TC6-steps.png` |
+| CI run on `main` | `22-ci-run-summary.png`, `23-ci-job-steps.png` |
 
 Repository: https://github.com/IvanFlores/playwright-automation-framework
