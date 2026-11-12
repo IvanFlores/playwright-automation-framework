@@ -8,4 +8,14 @@ export const users = {
     username: Env.testUsername,
     password: Env.testPassword,
   },
+  /** Deliberately non-existent account for negative login tests (not a real credential). */
+  invalidUser: {
+    username: 'unknown.user@example.test',
+    password: 'not-a-valid-password',
+  },
 } as const satisfies Record<string, User>;
+
+/** Messages the login page shows. */
+export const loginMessages = {
+  invalidCredentials: 'Invalid username or password',
+} as const;

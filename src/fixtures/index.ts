@@ -1,6 +1,7 @@
 import { test as base, expect } from '@playwright/test';
 import { LoginPage } from '@pages/LoginPage';
 import { HomePage } from '@pages/HomePage';
+import { ArticlesPage } from '@pages/ArticlesPage';
 import { ApiClient } from '@api/ApiClient';
 import { users } from '@data/auth.data';
 
@@ -8,6 +9,7 @@ type Fixtures = {
   authenticatedPage: LoginPage;
   loginPage: LoginPage;
   homePage: HomePage;
+  articlesPage: ArticlesPage;
   api: ApiClient;
 };
 
@@ -32,6 +34,13 @@ export const test = base.extend<Fixtures>({
   homePage: async ({ page, authenticatedPage }, use) => {
     void authenticatedPage; // dependency only: guarantees login ran on this `page`
     await use(new HomePage(page));
+  },
+
+  // No auth: the article list is public.
+  articlesPage: async ({ page }, use) => {
+    const articlesPage = new ArticlesPage(page);
+    await articlesPage.navigate('/articles.html');
+    await use(articlesPage);
   },
 
   api: async ({ request }, use) => {
