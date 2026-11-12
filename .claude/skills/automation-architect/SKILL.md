@@ -1,23 +1,35 @@
 ---
 name: automation-architect
-description: 'Hub skill that orchestrates pom-architect and test-standards for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, to check structure only, or to scaffold new Page Objects, fixtures, and spec files following all agreed patterns. Triggers: "apply architecture", "aplicar arquitectura", "full review", "check structure", "revisar estructura", "scaffold", "generar", "new page object". Invoke sub-skills independently for targeted checks.'
+description: 'Hub skill that orchestrates pom-architect, test-standards, spec-standards and git-standards for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, to check structure only, to scaffold new Page Objects, fixtures, and spec files following all agreed patterns, or to validate / run the git workflow. Triggers: "apply architecture", "aplicar arquitectura", "full review", "check structure", "revisar estructura", "scaffold", "generar", "new page object", "check git", "verify commits", "git conventions", "git workflow", "commit push PR", "create PR". Invoke sub-skills independently for targeted checks.'
 ---
 
 # automation-architect (hub)
 
-Orchestrates the two rule skills of this project:
+Orchestrates the rule skills of this project:
 
 | Sub-skill | File | Owns |
 |---|---|---|
 | `pom-architect` | `.claude/skills/pom-architect/SKILL.md` | Page Object Model rules 1–8 |
-| `test-standards` | `.claude/skills/test-standards/SKILL.md` | Test writing / organisation rules 1–8 |
+| `test-standards` | `.claude/skills/test-standards/SKILL.md` | Test code quality rules 1–8 (imports, fixtures, credentials, framework) |
+| `spec-standards` | `.claude/skills/spec-standards/SKILL.md` | Spec organisation rules R1–R5 (TC folders, file naming, TC IDs, `test.step()`) |
+| `git-standards` | `.claude/skills/git-standards/SKILL.md` | Git workflow conventions C1–C4 + execute E1–E5 (Mode 4 only) |
 
-**The hub does not duplicate their rules.** For each pipeline step it loads
-`.claude/skills/pom-architect/SKILL.md` and `.claude/skills/test-standards/SKILL.md`, applies their
-rules exactly as written there, and aggregates their output. When this file refers to "pom-architect
-rule N" or "test-standards rule N", the sub-skill file is the source of truth.
+**The hub does not duplicate their rules.** For each pipeline step it loads the sub-skill's
+`SKILL.md`, applies its rules exactly as written there, and aggregates their output. When this file
+refers to "pom-architect rule N", "test-standards rule N" or "spec-standards RN", the sub-skill file
+is the source of truth.
 
 For a targeted check (one rule family only), invoke the sub-skill directly instead of the hub.
+
+### Sub-skill invocation reference
+
+| Goal | Skill to load | Trigger phrase example |
+|---|---|---|
+| Full architecture review + fix | `automation-architect` (Mode 1) | "apply architecture" |
+| Page Object rules only | `pom-architect` | "check page objects" |
+| Spec code quality only | `test-standards` | "check test standards" |
+| Fix TC folder / naming / step violations | `spec-standards` | "check spec structure" |
+| Validate git conventions or run full git workflow | `git-standards` | "check git" / "git workflow" |
 
 ---
 
@@ -64,8 +76,9 @@ For a targeted check (one rule family only), invoke the sub-skill directly inste
 | 1 | Full pipeline | Architecture enforcement (detect + fix) | Active (M4) |
 | 2 | Structure only | Folder placement + import style (report-only) | Active (M4) |
 | 3 | Scaffold new file | Generation of PO + fixture + spec | Active (M4) |
+| 4 | Git workflow | Git conventions (validate + execute) | Active (M5) — `docs/decisions/ADR-001-git-workflow-mode.md` |
 
-Current total: **3 / 10** modes (see Hub Growth Policy, Rule 4).
+Current total: **4 / 10** modes (see Hub Growth Policy, Rule 4).
 
 Mode selection: match the user's wording against each mode's triggers. If nothing matches, use
 Mode 1. If the wording matches Mode 1 **and** asks not to fix ("review only"), run Mode 1 in
@@ -85,10 +98,14 @@ Steps:
    Page Objects / fixtures they depend on.
 2. Apply `pom-architect` — load its SKILL.md, detect + auto-fix all POM violations.
 3. Apply `test-standards` — load its SKILL.md, detect + auto-fix all test writing violations.
-4. Re-scan once (both skills, detection only) to confirm no violation was introduced by the fixes.
-   Newly introduced violations are fixed if mechanical, otherwise added to the manual list. Do not
-   loop more than once.
-5. Output unified summary.
+4. Apply `spec-standards` — load its SKILL.md, detect + auto-fix all spec organisation violations
+   (folder / file name / TC ID / `test.step()`).
+5. Re-scan once (all three skills, detection only) to confirm no violation was introduced by the
+   fixes. Newly introduced violations are fixed if mechanical, otherwise added to the manual list.
+   Do not loop more than once.
+6. Output unified summary.
+
+`git-standards` is **not** part of Mode 1 (it inspects git state, not code) — use Mode 4.
 
 Output:
 
@@ -97,6 +114,7 @@ Output:
 ─────────────────────────────────────────
 pom-architect:    X violations found — Y auto-applied
 test-standards:   X violations found — Y auto-applied
+spec-standards:   X violations found — Y auto-applied
 Remaining manual fixes: <list, or "none">
 [automation-architect] ✅ All rules satisfied.      ← only when Remaining manual fixes is "none"
 [automation-architect] ⚠️ Manual fixes pending.     ← otherwise
@@ -222,6 +240,24 @@ Created:  src/ui/pages/<Name>Page.ts
 Updated:  src/fixtures/index.ts
 Created:  tests/<name>.spec.ts
 ```
+
+---
+
+## Mode 4 — Git workflow
+
+Triggered by: "check git", "verify commits", "git conventions", "pre-PR check", "git workflow",
+"commit push PR", "create PR".
+
+Thin wrapper — the rules live only in `git-standards`.
+
+Steps:
+
+1. Load `.claude/skills/git-standards/SKILL.md`.
+2. Pick the capability from the wording: Validate (check / verify / pre-PR) or Execute
+   (branch / commit / push / PR / workflow).
+3. Forward the sub-skill output verbatim.
+
+Load `git-standards` directly for standalone git work without activating the hub.
 
 ---
 

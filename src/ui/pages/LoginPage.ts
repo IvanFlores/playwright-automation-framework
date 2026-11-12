@@ -14,6 +14,11 @@ export class LoginPage extends BasePage {
     return this.page.getByRole('button', { name: 'LogIn' });
   }
 
+  /** Error shown after a failed login attempt. */
+  get errorMessage() {
+    return this.page.getByTestId('login-error');
+  }
+
   /** Post-login: greeting that shows the signed-in user's email. */
   get greeting() {
     return this.page.getByTestId('hello');

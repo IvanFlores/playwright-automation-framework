@@ -6,7 +6,10 @@ import { Env } from './src/config/Env';
 
 // Load .env.<TEST_ENV> first (it wins), then the base .env.
 // Env.ts already does this on import; kept here so the config is self-explanatory.
-dotenv.config({ path: path.resolve(__dirname, `.env.${process.env.TEST_ENV ?? 'local'}`), quiet: true });
+dotenv.config({
+  path: path.resolve(__dirname, `.env.${process.env.TEST_ENV ?? 'local'}`),
+  quiet: true,
+});
 dotenv.config({ path: path.resolve(__dirname, '.env'), quiet: true });
 
 /**
