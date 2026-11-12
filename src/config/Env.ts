@@ -34,7 +34,9 @@ const baseUrl = read('BASE_URL');
 try {
   new URL(baseUrl);
 } catch {
-  throw new Error(`BASE_URL must be an absolute URL (e.g. http://localhost:3001), got "${baseUrl}".`);
+  throw new Error(
+    `BASE_URL must be an absolute URL (e.g. http://localhost:3001), got "${baseUrl}".`,
+  );
 }
 
 /** Validated, typed access to environment configuration. Import as `import { Env } from '@config/Env'`. */
