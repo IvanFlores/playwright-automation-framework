@@ -49,7 +49,7 @@ Use another environment: `TEST_ENV=staging npm test` (loads `.env.staging`).
 src/config/Env.ts        validated env vars (.env, .env.<TEST_ENV>)
 src/ui/pages/            page objects (extend BasePage): Login, Home, Articles
 src/ui/components/       reusable component objects (NavBar)
-src/api/ApiClient.ts     API helper for setup/teardown and API tests
+src/api/                 API layer: client/ApiClient.ts, endpoints/, models/, controllers/ (lifecycle-architect)
 src/fixtures/index.ts    custom `test` (alias `@fixtures`) injecting page objects and `api`
 src/data/                users, messages and data factories
 tests/ui/<suite>/<feature>/TC{N}-<name>.spec.ts   UI test cases (smoke | regression)
