@@ -16,8 +16,12 @@ src/
   config/Env.ts        # validated env vars, loads .env / .env.<TEST_ENV>
   ui/pages/            # page objects (extend BasePage, locators as getters)
   ui/components/       # reusable component objects (nav bars, modals, tables)
-  api/ApiClient.ts     # thin API helper for setup/teardown and API tests
-  fixtures/index.ts    # custom `test` with page objects + api injected (`@fixtures`)
+  api/
+    client/ApiClient.ts  # only HTTP entry point; throws on non-2xx
+    endpoints/           # API path constants per resource
+    models/              # request/response interfaces
+    controllers/         # Auth, Article, Comment (GAD) and Post (JSONPlaceholder) operations
+  fixtures/index.ts    # custom `test`: page objects + API lifecycle fixtures (`@fixtures`)
   data/                # test data (users, messages, factories)
 tests/
   ui/smoke/<feature>/TC{N}-<name>.spec.ts       # critical-path UI test cases
@@ -41,12 +45,28 @@ docs/evidence/         # skill execution reports and screenshots
 | TC5 | smoke | articles | article list renders, pagination starts on page 1 |
 | TC6 | regression | articles | search with no match shows "No data" |
 | TC7 | regression | articles | "Items/Page" limits the list size |
+| TC8 | smoke | articles | search finds an article created through the API (pre/postcondition via API) |
+| TC9 | regression | comments | article page shows a comment created through the API (pre/postconditions via API) |
+
+### API preconditions and postconditions
+
+Lifecycle fixtures in `src/fixtures/index.ts` prepare data through GAD's REST API before the test
+and delete it after `use()`, even when the test fails:
+
+| Fixture | Precondition (setup) | Postcondition (teardown) |
+|---|---|---|
+| `createdArticle` | `POST /api/login` → `POST /api/articles` | `DELETE /api/articles/:id` |
+| `createdComment` | `POST /api/comments` on `createdArticle` | `DELETE /api/comments/:id` (before the article) |
+
+Specs only inject them (`async ({ createdArticle, articlesPage }) => …`); they never build an
+`ApiClient` or controller. The rules are in the `lifecycle-architect` skill.
 
 ## AI skills (Claude Code, `.claude/skills/`)
 
 | Skill | Owns | Trigger |
 |---|---|---|
-| `automation-architect` | hub — Mode 1 pipeline, 2 structure, 3 scaffold, 4 git | "apply architecture" |
+| `automation-architect` | hub — Mode 1 pipeline, 2 structure, 3 scaffold, 4 git, 5 lifecycle | "apply architecture" |
+| `lifecycle-architect` | API layer + API setup/teardown fixtures (R1–R8, R10, R11); Review / New / Add | "lifecycle review", "scaffold api" |
 | `pom-architect` | Page Object rules 1–8 | "check page objects" |
 | `test-standards` | spec code quality rules 1–8 | "check test standards" |
 | `spec-standards` | TC folders, file names, TC IDs, `test.step()` (R1–R5) | "check spec structure" |

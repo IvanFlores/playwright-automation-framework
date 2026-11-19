@@ -1,8 +1,17 @@
-import { test as base, expect } from '@playwright/test';
+import { APIRequestContext, test as base, expect } from '@playwright/test';
 import { LoginPage } from '@pages/LoginPage';
 import { HomePage } from '@pages/HomePage';
 import { ArticlesPage } from '@pages/ArticlesPage';
-import { ApiClient } from '@api/ApiClient';
+import { ArticlePage } from '@pages/ArticlePage';
+import { ApiClient } from '@api/client/ApiClient';
+import { AuthController } from '@api/controllers/AuthController';
+import { ArticleController } from '@api/controllers/ArticleController';
+import { CommentController } from '@api/controllers/CommentController';
+import { PostController } from '@api/controllers/PostController';
+import { Article } from '@api/models/article.model';
+import { Comment } from '@api/models/comment.model';
+import { buildArticle } from '@data/articles.data';
+import { buildComment } from '@data/comments.data';
 import { users } from '@data/auth.data';
 
 type Fixtures = {
@@ -10,7 +19,10 @@ type Fixtures = {
   loginPage: LoginPage;
   homePage: HomePage;
   articlesPage: ArticlesPage;
-  api: ApiClient;
+  articlePage: ArticlePage;
+  postController: PostController;
+  createdArticle: Article;
+  createdComment: Comment;
 };
 
 /** Import `test` and `expect` from here (`@fixtures`), not from @playwright/test, in every spec. */
@@ -70,9 +82,43 @@ export const test = base.extend<Fixtures>({
     await use(articlesPage);
   },
 
-  api: async ({ request }, use) => {
-    await use(new ApiClient(request));
+  // Auth not required: an article page is public. Opens the article created by the precondition.
+  articlePage: async ({ page, createdArticle }, use) => {
+    const articlePage = new ArticlePage(page);
+    await articlePage.navigate(`/article.html?id=${createdArticle.id}`);
+    await use(articlePage);
+  },
+
+  // ── API lifecycle fixtures (lifecycle-architect) ─────────────────────────────
+
+  // Controller fixture for the `api` project (JSONPlaceholder, read/echo only — nothing to clean up).
+  postController: async ({ request }, use) => {
+    await use(new PostController(new ApiClient(request)));
+  },
+
+  // Precondition: an article exists (created via API). Postcondition: it is deleted via API.
+  createdArticle: async ({ request }, use) => {
+    const controller = new ArticleController(await gadClient(request));
+    const article = await controller.create(buildArticle());
+    await use(article);
+    await controller.delete(article.id);
+  },
+
+  // Precondition: a comment exists on `createdArticle`. Postcondition: the comment is deleted
+  // (before the article, because Playwright tears dependent fixtures down first).
+  createdComment: async ({ request, createdArticle }, use) => {
+    const controller = new CommentController(await gadClient(request));
+    const comment = await controller.create(buildComment(createdArticle.id));
+    await use(comment);
+    await controller.delete(comment.id);
   },
 });
+
+/** ApiClient for GAD authenticated as the default test account. */
+async function gadClient(request: APIRequestContext): Promise<ApiClient> {
+  const client = new ApiClient(request);
+  client.setAuthToken(await new AuthController(client).login(users.appUser));
+  return client;
+}
 
 export { expect };

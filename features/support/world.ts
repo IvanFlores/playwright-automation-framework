@@ -11,7 +11,7 @@ import {
 } from '@playwright/test';
 import { Env } from '@config/Env';
 import { HomePage } from '@pages/HomePage';
-import { ApiClient } from '@api/ApiClient';
+import { ApiClient } from '@api/client/ApiClient';
 
 const launchers = { chromium, firefox, webkit };
 

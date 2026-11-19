@@ -1,6 +1,6 @@
 ---
 name: automation-architect
-description: 'Hub skill that orchestrates pom-architect, test-standards, spec-standards and git-standards for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, to check structure only, to scaffold new Page Objects, fixtures, and spec files following all agreed patterns, or to validate / run the git workflow. Triggers: "apply architecture", "aplicar arquitectura", "full review", "check structure", "revisar estructura", "scaffold", "generar", "new page object", "check git", "verify commits", "git conventions", "git workflow", "commit push PR", "create PR". Invoke sub-skills independently for targeted checks.'
+description: 'Hub skill that orchestrates pom-architect, test-standards, spec-standards, lifecycle-architect and git-standards for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, to check structure only, to scaffold new Page Objects, fixtures, and spec files following all agreed patterns, to validate / run the git workflow, or to scaffold API-based setup/teardown (lifecycle infrastructure). Triggers: "apply architecture", "aplicar arquitectura", "full review", "check structure", "revisar estructura", "scaffold", "generar", "new page object", "check git", "verify commits", "git conventions", "git workflow", "commit push PR", "create PR", "setup api layer", "scaffold api", "new controller", "add lifecycle support", "lifecycle architect". Invoke sub-skills independently for targeted checks.'
 ---
 
 # automation-architect (hub)
@@ -12,6 +12,7 @@ Orchestrates the rule skills of this project:
 | `pom-architect` | `.claude/skills/pom-architect/SKILL.md` | Page Object Model rules 1–8 |
 | `test-standards` | `.claude/skills/test-standards/SKILL.md` | Test code quality rules 1–8 (imports, fixtures, credentials, framework) |
 | `spec-standards` | `.claude/skills/spec-standards/SKILL.md` | Spec organisation rules R1–R5 (TC folders, file naming, TC IDs, `test.step()`) |
+| `lifecycle-architect` | `.claude/skills/lifecycle-architect/SKILL.md` | API layer + setup/teardown rules R1–R8, R10, R11 (`src/api/**`, lifecycle fixtures, spec injection) — added M6 |
 | `git-standards` | `.claude/skills/git-standards/SKILL.md` | Git workflow conventions C1–C4 + execute E1–E5 (Mode 4 only) |
 
 **The hub does not duplicate their rules.** For each pipeline step it loads the sub-skill's
@@ -30,6 +31,7 @@ For a targeted check (one rule family only), invoke the sub-skill directly inste
 | Spec code quality only | `test-standards` | "check test standards" |
 | Fix TC folder / naming / step violations | `spec-standards` | "check spec structure" |
 | Validate git conventions or run full git workflow | `git-standards` | "check git" / "git workflow" |
+| Review or scaffold the API layer / API setup-teardown | `lifecycle-architect` | "lifecycle review" / "scaffold api for articles" |
 
 ---
 
@@ -44,6 +46,10 @@ For a targeted check (one rule family only), invoke the sub-skill directly inste
 - `src/config/Env.ts` validates all required env vars at startup with descriptive errors.
 - `src/data/auth.data.ts` defines test users: `appUser` (from `Env`), plus site-specific accounts.
 - Specs live in `tests/` and are named `*.spec.ts`.
+- API layer (`lifecycle-architect`): `src/api/client/` (ApiClient, only HTTP entry point) ·
+  `src/api/endpoints/` (path constants) · `src/api/models/` (interfaces) · `src/api/controllers/`
+  (business operations) · `src/api/mocks/` (route stubs). Specs get API data only through
+  `<resource>Controller` / `created<Resource>` fixtures.
 - Path aliases are the only allowed import style — relative paths are always a violation
   (see `test-standards` rule 1 for the only exceptions).
 
@@ -77,8 +83,9 @@ For a targeted check (one rule family only), invoke the sub-skill directly inste
 | 2 | Structure only | Folder placement + import style (report-only) | Active (M4) |
 | 3 | Scaffold new file | Generation of PO + fixture + spec | Active (M4) |
 | 4 | Git workflow | Git conventions (validate + execute) | Active (M5) — `docs/decisions/ADR-001-git-workflow-mode.md` |
+| 5 | Lifecycle infrastructure | API layer scaffold for setup/teardown | Active (M6) — `docs/decisions/ADR-002-lifecycle-infrastructure-mode.md` |
 
-Current total: **4 / 10** modes (see Hub Growth Policy, Rule 4).
+Current total: **5 / 10** modes (see Hub Growth Policy, Rule 4).
 
 Mode selection: match the user's wording against each mode's triggers. If nothing matches, use
 Mode 1. If the wording matches Mode 1 **and** asks not to fix ("review only"), run Mode 1 in
@@ -100,10 +107,13 @@ Steps:
 3. Apply `test-standards` — load its SKILL.md, detect + auto-fix all test writing violations.
 4. Apply `spec-standards` — load its SKILL.md, detect + auto-fix all spec organisation violations
    (folder / file name / TC ID / `test.step()`).
-5. Re-scan once (all three skills, detection only) to confirm no violation was introduced by the
+5. Apply `lifecycle-architect` (Mode Review) on `src/api/**`, `src/fixtures/index.ts` (lifecycle
+   concerns only) and `tests/**/*.spec.ts` (R2, R7): auto-fix R1–R3, R5–R8, R11; collect R4 and R10
+   as manual fixes.
+6. Re-scan once (all four skills, detection only) to confirm no violation was introduced by the
    fixes. Newly introduced violations are fixed if mechanical, otherwise added to the manual list.
    Do not loop more than once.
-6. Output unified summary.
+7. Output unified summary.
 
 `git-standards` is **not** part of Mode 1 (it inspects git state, not code) — use Mode 4.
 
@@ -115,6 +125,7 @@ Output:
 pom-architect:    X violations found — Y auto-applied
 test-standards:   X violations found — Y auto-applied
 spec-standards:   X violations found — Y auto-applied
+lifecycle-architect: X violations found — Y auto-applied
 Remaining manual fixes: <list, or "none">
 [automation-architect] ✅ All rules satisfied.      ← only when Remaining manual fixes is "none"
 [automation-architect] ⚠️ Manual fixes pending.     ← otherwise
@@ -258,6 +269,25 @@ Steps:
 3. Forward the sub-skill output verbatim.
 
 Load `git-standards` directly for standalone git work without activating the hub.
+
+---
+
+## Mode 5 — Lifecycle infrastructure
+
+Triggered by: "setup api layer", "scaffold api", "new controller", "add lifecycle support",
+"lifecycle architect", "api precondition", "api postcondition".
+
+When to use: implementing API-based preconditions/postconditions for a test case, or extending the
+API layer with a new resource. Thin wrapper — the rules live only in `lifecycle-architect`.
+
+Steps:
+
+1. Load `.claude/skills/lifecycle-architect/SKILL.md`.
+2. Pick its mode: `src/api/client/ApiClient.ts` missing → **New**; resource has no controller →
+   **Add**; wording is review/check → **Review**.
+3. Forward the sub-skill output verbatim.
+
+Load `lifecycle-architect` directly for standalone API layer work without activating the hub.
 
 ---
 
