@@ -5,6 +5,10 @@ import { Article, CreateArticlePayload } from '@api/models/article.model';
 export class ArticleController {
   constructor(private readonly client: ApiClient) {}
 
+  async getAll(): Promise<Article[]> {
+    return this.client.get<Article[]>(ArticlesEndpoints.base);
+  }
+
   async getById(id: number): Promise<Article> {
     return this.client.get<Article>(ArticlesEndpoints.byId(id));
   }

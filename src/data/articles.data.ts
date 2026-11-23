@@ -1,4 +1,6 @@
 import { CreateArticlePayload } from '@api/models/article.model';
+import { Env } from '@config/Env';
+import { gadPastDate, uniqueSuffix } from '@data/factory.data';
 
 /** Test data for the GAD articles list (`/articles.html`). */
 export const articlesData = {
@@ -12,22 +14,15 @@ export const articlesData = {
   smallPageSize: 3,
 } as const;
 
-/** Unique per call, so parallel workers never collide on titles or bodies. */
-export const uniqueSuffix = (): string => `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
-
-/**
- * GAD rejects a `date` later than its own clock and only accepts `YYYY-MM-DDTHH:mm:ssZ`
- * (no milliseconds). One day in the past is safe whatever the server's time zone is.
- */
-export const gadPastDate = (): string =>
-  `${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 19)}Z`;
-
-/** Article payload for API setup; the title is unique so a search matches exactly this article. */
-export const buildArticle = (overrides: Partial<CreateArticlePayload> = {}): CreateArticlePayload => {
-  const suffix = uniqueSuffix();
+/** Article payload for API setup: prefixed and unique, so a search matches exactly this article. */
+export const buildArticle = (
+  parallelIndex: number,
+  overrides: Partial<CreateArticlePayload> = {},
+): CreateArticlePayload => {
+  const suffix = uniqueSuffix(parallelIndex);
   return {
-    title: `Lifecycle article ${suffix}`,
-    body: `Created through the API as a test precondition (${suffix}).`,
+    title: `${Env.testDataPrefix}article ${suffix}`,
+    body: `${Env.testDataPrefix}body ${suffix}`,
     date: gadPastDate(),
     image: '',
     ...overrides,

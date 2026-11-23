@@ -1,16 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
-import path from 'path';
-// Validates required variables at import time (fails fast with descriptive errors).
+// The only environment entry point: loads .env.<TEST_ENV> then .env and validates required
+// variables at import time (fails fast with descriptive errors).
 import { Env } from './src/config/Env';
-
-// Load .env.<TEST_ENV> first (it wins), then the base .env.
-// Env.ts already does this on import; kept here so the config is self-explanatory.
-dotenv.config({
-  path: path.resolve(__dirname, `.env.${process.env.TEST_ENV ?? 'local'}`),
-  quiet: true,
-});
-dotenv.config({ path: path.resolve(__dirname, '.env'), quiet: true });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -20,6 +11,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Env.isCI,
   retries: Env.isCI ? 2 : 0,
+  // spec-data: serial — CI runs against one GAD service container on a 2-vCPU runner; data isolation
+  // between workers is proven locally with `--workers=4 --repeat-each=4` (docs/evidence/M7).
   workers: Env.isCI ? 1 : undefined,
   reporter: [['list'], ['html', { open: 'never' }]],
 

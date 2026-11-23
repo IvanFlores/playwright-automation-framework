@@ -27,7 +27,7 @@ Not migrated yet: TC5, TC6, TC7.
 
 | Item | Value or generation rule | Class | Source |
 |------|--------------------------|-------|--------|
-| user | email `{prefix}user-{suffix}@example.test`, firstname `{prefix}worker`, lastname `w{parallelIndex}`, random password | Transactional | factory `buildUser(parallelIndex)` |
+| user | email `{prefix}user-{suffix}@example.test`, firstname `{prefix}w{parallelIndex}{random5}` (unique), lastname `worker`, random password | Transactional | factory `buildUser(parallelIndex)` |
 | articleTitle | `{prefix}article {suffix}` | Transactional | factory `buildArticle(parallelIndex)` |
 | articleBody | `{prefix}body {suffix}` | Transactional | factory `buildArticle(parallelIndex)` |
 | articleDate | 24 h before now, `YYYY-MM-DDTHH:mm:ssZ` (GAD rejects future dates) | Transactional | factory `gadPastDate()` |

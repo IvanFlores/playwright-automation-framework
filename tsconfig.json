@@ -20,5 +20,5 @@
       "@api/*": ["./src/api/*"]
     }
   },
-  "include": ["src", "tests", "features", "playwright.config.ts"]
+  "include": ["src", "tests", "features", "scripts", "playwright.config.ts"]
 }

@@ -27,7 +27,8 @@ Specifications owned by `spec-requirements-standard`. Index: README "Test cases"
 
 | Item | Value or generation rule | Class | Source |
 |------|--------------------------|-------|--------|
-| user | as TC8 (`buildUser(parallelIndex)`); full name `{userFullName}` = `{firstname} {lastname}` | Transactional | factory |
+| user | as TC8 (`buildUser(parallelIndex)`); unique `{firstname}` | Transactional | factory |
+| userPublicName | `{firstname} ****` — GAD masks the last name for visitors who are not logged in | Reference (product rule) | `publicName()` in `users.data.ts` |
 | articleTitle / articleBody | `{prefix}article {suffix}` / `{prefix}body {suffix}` | Transactional | factory `buildArticle(parallelIndex)` |
 | commentBody | `{prefix}comment {suffix}` | Transactional | factory `buildComment(articleId, parallelIndex)` |
 | prefix | `qa_` | Environment | `Env.testDataPrefix` |
@@ -36,8 +37,8 @@ Specifications owned by `spec-requirements-standard`. Index: README "Test cases"
 
 | # | Action | Expected result (oracle) |
 |---|--------|--------------------------|
-| 1 | Open `/article.html?id={articleId}` | Title text = `{articleTitle}`; body text = `{articleBody}`; author text = `{userFullName}` |
-| 2 | Read the comment card of `{commentId}` | Comment text = `{commentBody}`; comment author text = `{userFullName}` |
+| 1 | Open `/article.html?id={articleId}` | Title text = `{articleTitle}`; body text = `{articleBody}`; author text = `{userPublicName}` |
+| 2 | Read the comment card of `{commentId}` | Comment text = `{commentBody}`; comment author text = `{userPublicName}` |
 
 **Postconditions**
 
@@ -60,6 +61,12 @@ comments on load). Deleting a user does not cascade in GAD, so the user is delet
 - Q8 — the comment is identified by `{commentId}` and a unique `{commentBody}`.
 - Q10 — per-worker identity replaces the shared account.
 
+**Change log (M2 iteration 2, 2026-11-23 — after the first automated run)**
+
+- Q6/Q8 — author oracle was `{firstname} {lastname}`; the first run showed `qa_worker ****`
+  (GAD masks the last name for anonymous visitors). Oracle is now `{firstname} ****`, and the
+  firstname is unique per worker so the oracle identifies this worker's user.
+
 **Automation handoff (M4)**
 
 ```yaml
@@ -78,12 +85,12 @@ data:
   - { name: articleTitle, class: transactional, source: factory }
   - { name: articleBody, class: transactional, source: factory }
   - { name: commentBody, class: transactional, source: factory }
-captured: [articleTitle, articleBody, commentBody, userFullName]
+captured: [articleTitle, articleBody, commentBody, userPublicName]
 steps:
   - action: open /article.html?id={articleId}
-    oracle: title = createdArticle.title; body = createdArticle.body; author = workerUser full name
+    oracle: title = createdArticle.title; body = createdArticle.body; author = publicName(workerUser)
   - action: read comment card {commentId}
-    oracle: comment text = createdComment.body; comment author = workerUser full name
+    oracle: comment text = createdComment.body; comment author = publicName(workerUser)
 postconditions:
   - createdComment, then createdArticle deleted by id (test teardown)
   - workerUser deleted by id with its own token (worker teardown)
