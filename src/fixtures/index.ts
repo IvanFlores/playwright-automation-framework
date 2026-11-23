@@ -113,15 +113,19 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
       const client = new ApiClient(request);
       const userController = new UserController(client);
       const payload = buildUser(workerInfo.parallelIndex);
+      const credentials = { username: payload.email, password: payload.password };
       const created = await userController.create(payload);
-      const token = await new AuthController(client).login({
-        username: payload.email,
-        password: payload.password,
-      });
-      client.setAuthToken(token);
-      await use({ ...created, password: payload.password, token });
-      await userController.delete(created.id);
-      await request.dispose();
+      // From here on the user exists: whatever fails, the finally block deletes it. GAD only lets a
+      // user delete itself, so a leftover user without its password could never be cleaned up.
+      try {
+        const token = await new AuthController(client).login(credentials);
+        client.setAuthToken(token);
+        await use({ ...created, password: payload.password, token });
+      } finally {
+        client.setAuthToken(await new AuthController(client).login(credentials));
+        await userController.delete(created.id);
+        await request.dispose();
+      }
     },
     { scope: 'worker' },
   ],
