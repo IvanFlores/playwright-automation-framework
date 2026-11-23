@@ -150,8 +150,9 @@ Triggers: "refine test case" · "improve tc" · "make tc robust"
 
 1. Run M0 on the target TC to get the baseline score (keep the M0 output for the evidence).
 2. Rewrite it in the template, fixing each failed rule. Values that only the product can confirm
-   (exact texts, ids) are verified against the running app or its API before they become an oracle;
-   if they cannot be verified → `TBD:`.
+   (exact texts, ids) are verified against the running app or its API before they become an oracle:
+   read the **rendered value as the test's user sees it** (anonymous vs. logged in — GAD masks last
+   names and emails for anonymous visitors), not only the locator. If it cannot be verified → `TBD:`.
 3. Keep the TC ID; preserve the original intent. If the intent itself is untestable, propose a split
    and flag it, never silently change scope.
 4. Add a **Change log** under the TC: `Qn — <what changed and why>`.

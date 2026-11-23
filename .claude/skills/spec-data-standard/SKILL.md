@@ -144,10 +144,14 @@ workerUser: [async ({ playwright }, use, workerInfo) => {
   const users = new UserController(client);
   const user = buildUser(workerInfo.parallelIndex);         // unique, prefixed
   const created = await users.create(user);
-  client.setAuthToken(await new AuthController(client).login(user));
-  await use({ ...user, id: created.id, token: /* the one token of this identity */ });
-  await users.delete(created.id);                            // scoped teardown, own token
-  await request.dispose();
+  try {                                    // the user exists now: always delete it (GAD: own token only)
+    client.setAuthToken(await new AuthController(client).login(credentialsOf(user)));
+    await use({ ...created, password: user.password, token: /* the one token of this identity */ });
+  } finally {
+    client.setAuthToken(await new AuthController(client).login(credentialsOf(user)));
+    await users.delete(created.id);                          // scoped teardown, own token
+    await request.dispose();
+  }
 }, { scope: 'worker' }],
 ```
 
@@ -235,6 +239,9 @@ Executes tests and produces evidence; never modifies code.
 5. Classify failures: collision · session invalidation · missing data · order dependency ·
    non-data flakiness (timing/selector → `pom-architect` / `test-standards`).
 6. Compare with the previous run (before/after).
+
+The verdict is ❌ when any R1, R2 or R15 finding is open, **even if every run passes**: those
+collisions are latent (they appear with a new cleanup, more workers, or a single-session backend).
 
 ```
 [spec-data-standard] ROBUSTNESS VERIFICATION

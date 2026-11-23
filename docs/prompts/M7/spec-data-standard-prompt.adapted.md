@@ -98,3 +98,31 @@ environment run (the base prompt already allows this since its iteration 3).
 ### B10 — Output format
 
 Same bracket tag as A6. Rules keep the base prompt IDs (R1–R15) so the evidence maps to the course.
+
+---
+
+## Overrides added by iteration (see `docs/evidence/M7/06-prompt-iteration.md`)
+
+### B11 — Rule conditions widened (iteration #5)
+
+| Rule | Add to the condition |
+|---|---|
+| R2 | "or a suffix without `parallelIndex`" |
+| R4 | conditional suppression (`workers: Env.isCI ? 1 : undefined`) |
+| R9 | `playwright.config.ts` is in scope (second dotenv load / `process.env`) |
+| R13 | partial match: `toContainText` on a container when the field has its own locator |
+
+### B12 — M5 verdict (iteration #7)
+
+❌ while any R1, R2 or R15 finding is open, even if every run passes.
+
+### B13 — Worker identity teardown in `finally` (iteration #8)
+
+The canonical `worker<Resource>` deletes the identity in a `finally` block that re-authenticates
+first. Anything that throws after the create (login included) must not leave an identity that only
+its own token can delete.
+
+### B14 — Prefix on a publicly visible field (iteration #9)
+
+GAD masks `email` and `lastname` for anonymous reads: the prefix (and the per-worker uniqueness) go
+into `firstname`, and the orphan check filters users by `firstname`.

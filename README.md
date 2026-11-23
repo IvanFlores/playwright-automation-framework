@@ -20,14 +20,17 @@ src/
     client/ApiClient.ts  # only HTTP entry point; throws on non-2xx
     endpoints/           # API path constants per resource
     models/              # request/response interfaces
-    controllers/         # Auth, Article, Comment (GAD) and Post (JSONPlaceholder) operations
+    controllers/         # Auth, Article, Comment, User (GAD) and Post (JSONPlaceholder) operations
   fixtures/index.ts    # custom `test`: page objects + API lifecycle fixtures (`@fixtures`)
-  data/                # test data (users, messages, factories)
+  data/                # test data (users, messages, factories prefixed with TEST_DATA_PREFIX)
 tests/
   ui/smoke/<feature>/TC{N}-<name>.spec.ts       # critical-path UI test cases
   ui/regression/<feature>/TC{N}-<name>.spec.ts  # negative / edge-case UI test cases
   api/                 # API-only specs (api project)
   setup/auth.setup.ts  # optional login-once storageState setup
+scripts/orphan-check.ts  # `npm run data:orphans` — leftover test data in GAD
+docs/test-cases/gad/   # TC specifications (spec-requirements-standard) — TC8, TC9
+docs/prompts/          # course prompts (original + adapted overrides)
 docs/decisions/        # ADRs (required before adding a hub mode)
 docs/evidence/         # skill execution reports and screenshots
 .claude/skills/        # AI skills (see "AI skills" below)
@@ -45,18 +48,25 @@ docs/evidence/         # skill execution reports and screenshots
 | TC5 | smoke | articles | article list renders, pagination starts on page 1 |
 | TC6 | regression | articles | search with no match shows "No data" |
 | TC7 | regression | articles | "Items/Page" limits the list size |
-| TC8 | smoke | articles | search finds an article created through the API (pre/postcondition via API) |
-| TC9 | regression | comments | article page shows a comment created through the API (pre/postconditions via API) |
+| TC8 | smoke | articles | search finds an article created through the API (pre/postcondition via API) — [spec](docs/test-cases/gad/articles-test-cases.md) |
+| TC9 | regression | comments | article page shows a comment created through the API (pre/postconditions via API) — [spec](docs/test-cases/gad/comments-test-cases.md) |
+
+TC8 and TC9 are tagged `@mutates-data` (`npx playwright test --grep-invert @mutates-data` skips them).
 
 ### API preconditions and postconditions
 
 Lifecycle fixtures in `src/fixtures/index.ts` prepare data through GAD's REST API before the test
 and delete it after `use()`, even when the test fails:
 
-| Fixture | Precondition (setup) | Postcondition (teardown) |
-|---|---|---|
-| `createdArticle` | `POST /api/login` → `POST /api/articles` | `DELETE /api/articles/:id` |
-| `createdComment` | `POST /api/comments` on `createdArticle` | `DELETE /api/comments/:id` (before the article) |
+| Fixture | Scope | Precondition (setup) | Postcondition (teardown) |
+|---|---|---|---|
+| `workerUser` | worker | `POST /api/users` → `POST /api/login` (one token per worker) | `DELETE /api/users/:id` after the worker's last test |
+| `createdArticle` | test | `POST /api/articles` with `workerUser`'s token | `DELETE /api/articles/:id` |
+| `createdComment` | test | `POST /api/comments` on `createdArticle` | `DELETE /api/comments/:id` (before the article) |
+
+Each parallel worker writes data as its own throwaway GAD user, so workers never share the data they
+create. Generated data starts with `TEST_DATA_PREFIX` (`qa_`); `npm run data:orphans` lists anything
+left behind (exit code 1).
 
 Specs only inject them (`async ({ createdArticle, articlesPage }) => …`); they never build an
 `ApiClient` or controller. The rules are in the `lifecycle-architect` skill.
@@ -65,8 +75,10 @@ Specs only inject them (`async ({ createdArticle, articlesPage }) => …`); they
 
 | Skill | Owns | Trigger |
 |---|---|---|
-| `automation-architect` | hub — Mode 1 pipeline, 2 structure, 3 scaffold, 4 git, 5 lifecycle | "apply architecture" |
+| `automation-architect` | hub — Mode 1 pipeline, 2 structure, 3 scaffold, 4 git, 5 lifecycle, 6 TC quality review | "apply architecture" |
 | `lifecycle-architect` | API layer + API setup/teardown fixtures (R1–R8, R10, R11); Review / New / Add | "lifecycle review", "scaffold api" |
+| `spec-requirements-standard` | TC specifications in `docs/test-cases/` (Q1–Q13); M0 assess · M1 write · M2 refine · M3 coverage · M4 handoff — added M7 | "assess test cases", "refine test case TC8" |
+| `spec-data-standard` | test data robustness (R1–R15); M0 maturity · M1 isolation · M2 sourcing · M3 environments · M4 exact values · M5 verification — added M7 | "assess test data", "verify robustness" |
 | `pom-architect` | Page Object rules 1–8 | "check page objects" |
 | `test-standards` | spec code quality rules 1–8 | "check test standards" |
 | `spec-standards` | TC folders, file names, TC IDs, `test.step()` (R1–R5) | "check spec structure" |

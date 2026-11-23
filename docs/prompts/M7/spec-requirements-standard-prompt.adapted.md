@@ -89,3 +89,25 @@ Add `spec:` (target spec path) and keep `tags` with both the suite tag and the d
 
 Same seven steps as the base prompt. Evidence lands in `docs/evidence/M7/` — see
 [`00-runbook.md`](../../evidence/M7/00-runbook.md).
+
+---
+
+## Overrides added by iteration (see `docs/evidence/M7/06-prompt-iteration.md`)
+
+### A8 — Grading and N/A rules (iteration #2)
+
+Ready = score ≥ 90 **and** no ERROR rule failed. A rule that cannot apply (e.g. Q9 on a read-only
+TC) is N/A, leaves the total weight, and is listed in the output.
+
+### A9 — Rule conditions widened (iteration #4)
+
+- Q13 also fails when the TC has **no numbered steps at all**.
+- Q10 also fails when the TC depends on an **identity or data shared with TCs that run in
+  parallel** (e.g. one `.env` account used by every worker).
+- Q6 lists "contains" next to "visible / non-empty / at least one".
+
+### A10 — Verify rendered values in M2 (iteration #6)
+
+M2 step 2: before a value becomes an oracle, read the **rendered value as the test's user sees it**
+(anonymous vs. logged in — GAD masks last names and emails for anonymous visitors), not only the
+locator.
