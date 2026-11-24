@@ -22,8 +22,7 @@ deterministic, parallel-safe and leave no data behind.
 was not enforceable. This skill also governs how specs consume the lifecycle layer: controllers
 and created data are **always injected as fixture parameters**, never instantiated in a test body.
 
-Growth path (not enforced yet): database-level setup/teardown · auth-token caching across fixtures ·
-environment-scoped teardown policies (e.g. skip destructive teardown on staging).
+Growth path (not enforced yet): DB-level setup/teardown · token caching · env-scoped teardown policies.
 
 ---
 
@@ -83,6 +82,7 @@ src/api/
 | Create data (precondition), assert, then clean up (postcondition) | Data fixture with teardown | `created<Resource>` | The created resource object |
 | Verify a clean initial state + clean up after the test | Setup + teardown fixture | `clean<Resource>` | The controller instance |
 | Mock a route for this test | Mock fixture (mock factory) | `mock<Resource>` | Registered route stub |
+| Identity whose data tests mutate (`spec-data-standard` R1) | Worker fixture, `scope: 'worker'` | `worker<Resource>` | The created identity (+ its token) |
 
 ### Canonical patterns
 
@@ -318,8 +318,8 @@ exception).
 ### R8 — LIFECYCLE_FIXTURE_NAMING_CONVENTION (WARNING, auto-fix)
 
 Condition: a lifecycle fixture name does not follow the decision table (`<resource>Controller`,
-`created<Resource>`, `clean<Resource>`, `mock<Resource>`). A fixture that exposes the raw `ApiClient`
-(e.g. `api`) is a violation.
+`created<Resource>`, `clean<Resource>`, `mock<Resource>`, `worker<Resource>`). A fixture exposing the
+raw `ApiClient` (e.g. `api`) is a violation.
 
 Fix: rename/replace the fixture and update every spec that injects it.
 

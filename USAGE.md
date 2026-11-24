@@ -25,6 +25,7 @@ cp .env.example .env                  # then edit values
 | `TEST_USERNAME` / `TEST_PASSWORD` | yes | GAD account used by the `authenticatedPage` fixture |
 | `API_BASE_URL` | no | API tests host (default JSONPlaceholder) |
 | `TEST_ENV` | no | loads `.env.<TEST_ENV>` before `.env` |
+| `TEST_DATA_PREFIX` | no | prefix of every record the tests create (default `qa_`) |
 
 ## 3. Running tests
 | Command | What it does |
@@ -39,6 +40,7 @@ cp .env.example .env                  # then edit values
 | `npm run test:ui` | Playwright UI mode |
 | `npm run report` | Open the HTML report (`playwright-report/`) |
 | `npm run codegen` | Record a test / discover locators |
+| `npm run data:orphans` | List GAD users/articles/comments left with `TEST_DATA_PREFIX` (exit 1 if any) |
 | `npm run typecheck` / `lint` / `format` | Code quality |
 
 Run one file: `npx playwright test tests/ui/smoke/login/TC1-valid-login.spec.ts`.

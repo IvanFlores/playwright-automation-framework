@@ -1,6 +1,6 @@
 ---
 name: automation-architect
-description: 'Hub skill that orchestrates pom-architect, test-standards, spec-standards, lifecycle-architect and git-standards for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, to check structure only, to scaffold new Page Objects, fixtures, and spec files following all agreed patterns, to validate / run the git workflow, or to scaffold API-based setup/teardown (lifecycle infrastructure). Triggers: "apply architecture", "aplicar arquitectura", "full review", "check structure", "revisar estructura", "scaffold", "generar", "new page object", "check git", "verify commits", "git conventions", "git workflow", "commit push PR", "create PR", "setup api layer", "scaffold api", "new controller", "add lifecycle support", "lifecycle architect". Invoke sub-skills independently for targeted checks.'
+description: 'Hub skill that orchestrates pom-architect, test-standards, spec-standards, lifecycle-architect, spec-requirements-standard, spec-data-standard and git-standards for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, to check structure only, to scaffold new Page Objects, fixtures, and spec files following all agreed patterns, to validate / run the git workflow, to scaffold API-based setup/teardown (lifecycle infrastructure), or to review TC quality (specification + test data robustness). Triggers: "apply architecture", "aplicar arquitectura", "full review", "check structure", "revisar estructura", "scaffold", "generar", "new page object", "check git", "verify commits", "git conventions", "git workflow", "commit push PR", "create PR", "setup api layer", "scaffold api", "new controller", "add lifecycle support", "lifecycle architect", "tc quality review", "assess test cases", "refine test case", "automation readiness", "assess test data", "data robustness", "parallel safe", "multi environment", "verify robustness". Invoke sub-skills independently for targeted checks.'
 ---
 
 # automation-architect (hub)
@@ -13,6 +13,8 @@ Orchestrates the rule skills of this project:
 | `test-standards` | `.claude/skills/test-standards/SKILL.md` | Test code quality rules 1–8 (imports, fixtures, credentials, framework) |
 | `spec-standards` | `.claude/skills/spec-standards/SKILL.md` | Spec organisation rules R1–R5 (TC folders, file naming, TC IDs, `test.step()`) |
 | `lifecycle-architect` | `.claude/skills/lifecycle-architect/SKILL.md` | API layer + setup/teardown rules R1–R8, R10, R11 (`src/api/**`, lifecycle fixtures, spec injection) — added M6 |
+| `spec-requirements-standard` | `.claude/skills/spec-requirements-standard/SKILL.md` | TC specification Q1–Q13 · M0–M4 (`docs/test-cases/**/*.md`) — added M7 |
+| `spec-data-standard` | `.claude/skills/spec-data-standard/SKILL.md` | Test data R1–R15 · M0–M5: classification · isolation · sourcing · environments · expected values (`src/data/**` · `src/config/**` · `src/fixtures/**` · `playwright.config.ts` · `tests/**/*.spec.ts`) — added M7 |
 | `git-standards` | `.claude/skills/git-standards/SKILL.md` | Git workflow conventions C1–C4 + execute E1–E5 (Mode 4 only) |
 
 **The hub does not duplicate their rules.** For each pipeline step it loads the sub-skill's
@@ -32,6 +34,10 @@ For a targeted check (one rule family only), invoke the sub-skill directly inste
 | Fix TC folder / naming / step violations | `spec-standards` | "check spec structure" |
 | Validate git conventions or run full git workflow | `git-standards` | "check git" / "git workflow" |
 | Review or scaffold the API layer / API setup-teardown | `lifecycle-architect` | "lifecycle review" / "scaffold api for articles" |
+| Score TC specifications | `spec-requirements-standard` | "assess test cases" |
+| Upgrade an incomplete TC / prepare it for automation | `spec-requirements-standard` | "refine test case TC8" / "automation readiness TC8" |
+| Assess test data maturity / make tests safe in parallel | `spec-data-standard` | "assess test data" / "parallel safe" |
+| Verify robustness with evidence | `spec-data-standard` | "verify robustness" |
 
 ---
 
@@ -49,7 +55,10 @@ For a targeted check (one rule family only), invoke the sub-skill directly inste
 - API layer (`lifecycle-architect`): `src/api/client/` (ApiClient, only HTTP entry point) ·
   `src/api/endpoints/` (path constants) · `src/api/models/` (interfaces) · `src/api/controllers/`
   (business operations) · `src/api/mocks/` (route stubs). Specs get API data only through
-  `<resource>Controller` / `created<Resource>` fixtures.
+  `<resource>Controller` / `created<Resource>` / `worker<Resource>` fixtures.
+- TC specifications (`spec-requirements-standard`): `docs/test-cases/gad/{feature}-test-cases.md`.
+  Test data (`spec-data-standard`): `src/data/` (factories prefixed with `Env.testDataPrefix`) and
+  `src/config/Env.ts` (environment selection and validation).
 - Path aliases are the only allowed import style — relative paths are always a violation
   (see `test-standards` rule 1 for the only exceptions).
 
@@ -84,8 +93,9 @@ For a targeted check (one rule family only), invoke the sub-skill directly inste
 | 3 | Scaffold new file | Generation of PO + fixture + spec | Active (M4) |
 | 4 | Git workflow | Git conventions (validate + execute) | Active (M5) — `docs/decisions/ADR-001-git-workflow-mode.md` |
 | 5 | Lifecycle infrastructure | API layer scaffold for setup/teardown | Active (M6) — `docs/decisions/ADR-002-lifecycle-infrastructure-mode.md` |
+| 6 | TC quality review | TC lifecycle phases: specification + test data robustness | Active (M7) — `docs/decisions/ADR-003-tc-quality-review-mode.md` |
 
-Current total: **5 / 10** modes (see Hub Growth Policy, Rule 4).
+Current total: **6 / 10** modes (see Hub Growth Policy, Rule 4).
 
 Mode selection: match the user's wording against each mode's triggers. If nothing matches, use
 Mode 1. If the wording matches Mode 1 **and** asks not to fix ("review only"), run Mode 1 in
@@ -99,6 +109,8 @@ Triggered by: "aplicar arquitectura", "apply architecture", "full review", "enfo
 
 Steps:
 
+0. Run `spec-requirements-standard` M0 on `docs/test-cases/**` (report only, no auto-fix except
+   Q13). TCs graded Incomplete are listed as manual items.
 1. Identify all relevant files (specs, Page Objects, fixtures, data files):
    `tests/**/*.spec.ts`, `src/ui/**`, `src/fixtures/**`, `src/data/**`, `src/config/**`,
    `src/helpers/**`, `src/api/**`. If the user named specific files, limit the run to those plus the
@@ -110,10 +122,12 @@ Steps:
 5. Apply `lifecycle-architect` (Mode Review) on `src/api/**`, `src/fixtures/index.ts` (lifecycle
    concerns only) and `tests/**/*.spec.ts` (R2, R7): auto-fix R1–R3, R5–R8, R11; collect R4 and R10
    as manual fixes.
-6. Re-scan once (all four skills, detection only) to confirm no violation was introduced by the
+6. Apply `spec-data-standard` (R1–R15) on fixtures, data, config, `playwright.config.ts` and specs:
+   auto-fix R2, R3, R6–R9, R11; collect R1, R4, R5, R10, R12–R15 as manual fixes.
+7. Re-scan once (all code skills, detection only) to confirm no violation was introduced by the
    fixes. Newly introduced violations are fixed if mechanical, otherwise added to the manual list.
    Do not loop more than once.
-7. Output unified summary.
+8. Output unified summary.
 
 `git-standards` is **not** part of Mode 1 (it inspects git state, not code) — use Mode 4.
 
@@ -126,6 +140,8 @@ pom-architect:    X violations found — Y auto-applied
 test-standards:   X violations found — Y auto-applied
 spec-standards:   X violations found — Y auto-applied
 lifecycle-architect: X violations found — Y auto-applied
+spec-data-standard: X violations found — Y auto-applied
+spec-requirements-standard: <n> TCs assessed — <r> Ready (report-only)
 Remaining manual fixes: <list, or "none">
 [automation-architect] ✅ All rules satisfied.      ← only when Remaining manual fixes is "none"
 [automation-architect] ⚠️ Manual fixes pending.     ← otherwise
@@ -288,6 +304,31 @@ Steps:
 3. Forward the sub-skill output verbatim.
 
 Load `lifecycle-architect` directly for standalone API layer work without activating the hub.
+
+---
+
+## Mode 6 — TC quality review
+
+Triggered by: "tc quality review", "assess test cases", "refine test case", "write test case",
+"tc coverage", "automation readiness", "assess test data", "data robustness", "parallel safe",
+"multi environment", "verify robustness".
+
+Routes the TC lifecycle phases to their owners (no rules here):
+
+| Phase | Skill · mode |
+|---|---|
+| 1. Specify | `spec-requirements-standard` M0–M4 |
+| 2. Arrange | `spec-data-standard` M1–M3 · `lifecycle-architect` Add (missing controllers) |
+| 3. Act | Mode 3 (PO / fixture / spec) · `pom-architect` |
+| 4. Assert | `spec-data-standard` M4 |
+| 5. Run | `spec-data-standard` M5 |
+
+Steps:
+
+1. Pick the phase from the wording (specification words → phase 1; data / parallel / environment
+   words → phases 2–5). With no hint, run phase 1 M0 then `spec-data-standard` M0 (both read-only).
+2. Load the skill, run the mode, forward its output verbatim.
+3. When phase 1 produces an M4 handoff, pass it as the input of `spec-data-standard`.
 
 ---
 

@@ -46,5 +46,7 @@ export const Env = {
   apiBaseUrl: process.env.API_BASE_URL?.trim() || 'https://jsonplaceholder.typicode.com',
   testUsername: read('TEST_USERNAME'),
   testPassword: read('TEST_PASSWORD'),
+  /** Every generated record starts with this, so leftovers can be found (`npm run data:orphans`). */
+  testDataPrefix: process.env.TEST_DATA_PREFIX?.trim() || 'qa_',
   isCI: !!process.env.CI,
 } as const;

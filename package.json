@@ -20,6 +20,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "data:orphans": "tsx scripts/orphan-check.ts",
     "bdd": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.cjs",
     "bdd:smoke": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.cjs --profile smoke",
     "bdd:regression": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.cjs --profile regression",

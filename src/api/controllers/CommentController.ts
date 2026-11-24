@@ -5,6 +5,10 @@ import { Comment, CreateCommentPayload } from '@api/models/comment.model';
 export class CommentController {
   constructor(private readonly client: ApiClient) {}
 
+  async getAll(): Promise<Comment[]> {
+    return this.client.get<Comment[]>(CommentsEndpoints.base);
+  }
+
   async create(payload: CreateCommentPayload): Promise<Comment> {
     return this.client.post<Comment>(CommentsEndpoints.base, payload);
   }

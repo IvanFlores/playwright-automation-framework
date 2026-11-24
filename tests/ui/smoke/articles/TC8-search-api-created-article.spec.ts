@@ -1,17 +1,14 @@
 import { test, expect } from '@fixtures';
 
-/**
- * Precondition (API):  `createdArticle` — logs in via POST /api/login and creates a uniquely titled
- *                      article via POST /api/articles.
- * Postcondition (API): the same fixture deletes it via DELETE /api/articles/:id after the test.
- */
+/** Specification: docs/test-cases/gad/articles-test-cases.md (TC8) — preconditions, data, cleanup. */
 test.describe('Articles', () => {
   test(
     'TC8: finds an article created through the API by searching its title',
-    { tag: '@smoke' },
+    { tag: ['@smoke', '@mutates-data'] },
     async ({ createdArticle, articlesPage }) => {
-      await test.step('Wait for the initial article list', async () => {
+      await test.step('Verify the article list is loaded with an empty search', async () => {
         await expect(articlesPage.articleTitles.first()).toBeVisible();
+        await expect(articlesPage.searchInput).toBeEmpty();
       });
 
       await test.step('Search for the title of the API-created article', async () => {

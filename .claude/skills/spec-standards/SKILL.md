@@ -30,7 +30,9 @@ Future growth (not active yet): tagging conventions, `beforeAll`/`afterAll` poli
 - `test.step()` is the only accepted way to label steps — `// Step N:` comments and JSDoc `@steps`
   are violations.
 - Suite tags (`@smoke` / `@regression`) are set with Playwright's `tag` option and should match the
-  suite folder (informational — a tagging rule is planned, not enforced yet).
+  suite folder (informational — a tagging rule is planned, not enforced yet). Data-impact tags
+  (`@mutates-data`, `@read-only`, `@env:<name>`) are defined by `spec-data-standard` R11 and go in the
+  same `tag` array: `{ tag: ['@smoke', '@mutates-data'] }`.
 - Out of scope: `tests/api/**` (API project, own `testMatch` in `playwright.config.ts`) and
   `tests/setup/**` (`*.setup.ts`, not specs).
 - Application under test: GAD (`BASE_URL`). Typical feature folders:

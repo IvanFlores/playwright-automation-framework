@@ -281,7 +281,8 @@ Auto-fix: move the shared constants/objects to a file in `src/data/` (named afte
 
 ### Rule 7 — No hardcoded credentials in specs (ERROR)
 
-Credentials must come from `users.*` (`@data/auth.data`) or `Env.*` (`@config/Env`).
+Credentials must come from `users.*` (`@data/auth.data`) or `Env.*` (`@config/Env`). An identity whose
+data the test creates or mutates comes from a `worker<Resource>` fixture (`spec-data-standard` R1).
 
 ```typescript
 // ❌
