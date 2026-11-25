@@ -109,8 +109,9 @@ Bracket tag `[ui-locator-wait-standard]`. Rules keep the base prompt IDs (R1–R
 
 GAD ships `data-testid` on its interactive and content elements on purpose (it is a test-automation
 training app). With no `testIdAttribute` in the config and no ADR, the base prompt resolves the
-contract to **none** and ranks `getByTestId` at tier 7 — M0 then asks to replace 14 working
-test-id getters with role/placeholder locators. Decision: declare the contract in **ADR-005** and
+contract to **none** and ranks `getByTestId` at tier 7 — M0 then asks to replace 9 working
+test-id getters with role/text locators, 7 of them `getByText(<the value the step asserts>)`
+(a circular oracle). R1 also gains: never locate an element by the value its step asserts. Decision: declare the contract in **ADR-005** and
 make it explicit in `playwright.config.ts` (`use.testIdAttribute: 'data-testid'`) so R1 resolves it
 from the config, as the base prompt prefers.
 

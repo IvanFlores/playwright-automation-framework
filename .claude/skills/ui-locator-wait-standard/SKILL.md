@@ -251,7 +251,11 @@ get submitButton() { return this.page.getByRole('button', { name: 'Login' }); } 
 ```
 
 Contract defined but attribute missing → semantic order + markup request. Never add the attribute
-without seeing it in the DOM (R4).
+without seeing it in the DOM (R4). *Iteration 1:* a contract the app ships on purpose is
+**declared** (ADR + `testIdAttribute` in `<runner-config>`), not inferred; and never locate an
+element by the value its step asserts (`getByText(x)` then `toHaveText(x)` proves nothing).
+*Iteration 2:* a family of test ids (`item-<id>-title`) → `getByTestId(/^item-\d+-title$/)` (tier 1),
+not a CSS `^=` / `$=` attribute selector (tier 8).
 
 ### R2 — JUSTIFIED_CSS_XPATH (WARNING, MANUAL-FIX) · M1
 A CSS or XPath locator (tier 8) has no `// locator: <reason>` comment saying why no tier 1–7
@@ -260,7 +264,9 @@ locator works. Fix: move up a tier, or add the reason.
 ### R3 — NO_FRAGILE_SELECTORS (ERROR, MANUAL-FIX) · M1
 A locator depends on a dynamic ID (digits/hash segment), a generated class (`css-*`, `sc-*`,
 `jss*`, hashed suffix), a CSS/XPath chain deeper than 3 levels, `:nth-child`, or XPath indexes
-(`[2]`). Fix: M1 fragile → robust table.
+(`[2]`). Fix: M1 fragile → robust table. *Iteration 3:* an id composed **only** from a key the test
+created or got from the API (`#gotoComment${comment.id}`) is deterministic — not R3; it is tier 8
+and needs an R2 reason. A digit segment the test cannot predict is still R3.
 
 ### R4 — NO_INVENTED_ATTRIBUTES (ERROR, MANUAL-FIX) · M1
 A locator references a test id, role name, label or attribute not observed in the DOM (codegen,
@@ -270,7 +276,8 @@ getter `// TODO: verify locator in DOM` and report it. Never guess.
 ### R5 — NO_POSITIONAL_WITHOUT_RULE (WARNING, MANUAL-FIX) · M2
 `.first()`, `.last()` or `.nth(n)` is the only disambiguation and has no
 `// position: <business rule>` comment. Fix: scope and filter by business data (R6); keep the
-position only when the order itself is the requirement.
+position only when the order itself is the requirement. *Iteration 4:* "the list is loaded"
+(`expect(list.first()).toBeVisible()`) → `await expect(list).not.toHaveCount(0)`.
 
 ### R6 — SCOPE_AND_FILTER (WARNING, MANUAL-FIX) · M2
 Similar elements are told apart by a long selector string instead of composition (region scope,
