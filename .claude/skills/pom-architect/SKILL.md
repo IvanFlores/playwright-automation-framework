@@ -23,6 +23,8 @@ mechanical and safe. Anything that needs human judgement is reported as `[MANUAL
 - `src/config/Env.ts` validates all required env vars at startup with descriptive errors.
 - `src/data/auth.data.ts` defines test users: `appUser` (from `Env`), plus site-specific accounts.
 - Specs live in `tests/` and are named `*.spec.ts`.
+- **Which** locator a getter returns → `ui-locator-wait-standard` (R1 hierarchy). With the test-id
+  contract (`testIdAttribute` in `playwright.config.ts`) use `getByTestId('x')`, never `locator('[data-testid="x"]')`.
 - Path aliases are the only allowed import style — relative paths are always a violation
   (see `test-standards` rule 1 for the only exceptions). Every import this skill writes uses an alias
   (`@pages/*`, `@components/*`, `@fixtures`, `@data/*`, `@config/*`, `@helpers/*`, `@api/*`).

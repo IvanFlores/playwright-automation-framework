@@ -82,7 +82,9 @@ docs/evidence/           skill run reports, screenshots
 - Path aliases only (`@pages/*`, `@fixtures`, `@data/*`, `@config/*`, …), no relative imports.
 - Import `test`/`expect` from `@fixtures`, not `@playwright/test`.
 - Locators live in page/component objects; specs hold intent and assertions.
-- Prefer `getByRole`, `getByLabel`, `getByTestId`; never use fixed sleeps.
+- Locators follow `ui-locator-wait-standard` R1: `getByTestId` (GAD `data-testid` contract, when the
+  element has it) → `getByRole` → `getByLabel` → … → CSS/XPath with a `// locator:` reason. Never use
+  fixed sleeps; wait for the terminal state; bounded polling only.
 - Credentials come from `users.*` (`@data/auth.data`), never literals in specs.
 - Tests must be independent and parallel-safe.
 

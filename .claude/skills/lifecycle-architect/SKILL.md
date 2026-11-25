@@ -240,8 +240,8 @@ Updated:  src/fixtures/index.ts
 
 0. Confirm `src/api/client/ApiClient.ts` exists and satisfies R1 / R11; fix first if not.
 1. Collect parameters (as New, Step 0).
-2. Steps 2–8 of New (skip the client).
-3. Run Mode Review on all of `src/api/` and `src/fixtures/index.ts`.
+2. Steps 2–8 of New (skip the client), then Mode Review on all of `src/api/` and `src/fixtures/index.ts`.
+3. Async resource → `get<Resource>Status` + state union in `models/` (polling: `ui-locator-wait-standard` R17–R18).
 
 Output: same block as New with the header `SCAFFOLD COMPLETE — Add` and no client line.
 

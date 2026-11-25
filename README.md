@@ -79,6 +79,7 @@ Specs only inject them (`async ({ createdArticle, articlesPage }) => …`); they
 | `lifecycle-architect` | API layer + API setup/teardown fixtures (R1–R8, R10, R11); Review / New / Add | "lifecycle review", "scaffold api" |
 | `spec-requirements-standard` | TC specifications in `docs/test-cases/` (Q1–Q13); M0 assess · M1 write · M2 refine · M3 coverage · M4 handoff — added M7 | "assess test cases", "refine test case TC8" |
 | `spec-data-standard` | test data robustness (R1–R15); M0 maturity · M1 isolation · M2 sourcing · M3 environments · M4 exact values · M5 verification — added M7 | "assess test data", "verify robustness" |
+| `ui-locator-wait-standard` | locators and waits (R1–R20); M0 maturity · M1 locator strategy · M2 uniqueness · M3 actions · M4 waits · M5 polling/timeouts · M6 verification — added M8-9 | "assess locators", "verify interactions" |
 | `pom-architect` | Page Object rules 1–8 | "check page objects" |
 | `test-standards` | spec code quality rules 1–8 | "check test standards" |
 | `spec-standards` | TC folders, file names, TC IDs, `test.step()` (R1–R5) | "check spec structure" |
@@ -103,7 +104,11 @@ npm run report
 
 - Import `test`/`expect` from `@fixtures`, never directly from `@playwright/test`.
 - Locators live in page/component objects; specs contain intent and assertions only.
-- Prefer user-facing locators (`getByRole`, `getByLabel`, `getByTestId`). No fixed sleeps.
+- Locator hierarchy (`ui-locator-wait-standard` R1): GAD's `data-testid` contract first (when the
+  element carries it) → role → label → placeholder → text → alt text → title → CSS/XPath with a
+  `// locator:` reason. No positions without a business rule.
+- Wait for the terminal state of every state-changing action; no fixed sleeps; polling is bounded
+  (`timeout` + `intervals` + message).
 - One TC per file, steps in `test.step()`, tags via the `tag` option (`@smoke`, `@regression`).
   Run with `npm run test:smoke`.
 - Git: branches `test/<scope>` or `fix/<scope>`; commits `type(scope): description`
