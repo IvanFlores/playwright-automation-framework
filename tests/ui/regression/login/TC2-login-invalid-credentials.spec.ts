@@ -1,22 +1,21 @@
 import { test, expect } from '@fixtures';
-import { users, loginMessages } from '@data/auth.data';
+import { authPaths, loginMessages, users } from '@data/auth.data';
 
+/** Specification: docs/test-cases/gad/login-test-cases.md (TC2). */
 test.describe('Login', () => {
   test(
     'TC2: shows an error and stays signed out with invalid credentials',
-    { tag: '@regression' },
+    { tag: ['@regression', '@read-only'] },
     async ({ loginPage }) => {
-      await test.step('Submit the login form with an unknown account', async () => {
+      await test.step('Submit an unknown account and verify the error text', async () => {
         await loginPage.login(users.invalidUser.username, users.invalidUser.password);
-      });
-
-      await test.step('Verify the invalid credentials error is shown', async () => {
         await expect(loginPage.errorMessage).toHaveText(loginMessages.invalidCredentials);
       });
 
-      await test.step('Verify the user is not signed in', async () => {
+      await test.step('Verify the user stays on the login page, signed out', async () => {
+        expect(loginPage.currentPath()).toBe(authPaths.login);
         await expect(loginPage.submitButton).toBeVisible();
-        await expect(loginPage.greeting).toBeHidden();
+        await expect(loginPage.greeting).toHaveCount(0);
       });
     },
   );

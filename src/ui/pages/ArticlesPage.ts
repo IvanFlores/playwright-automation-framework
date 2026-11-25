@@ -39,4 +39,10 @@ export class ArticlesPage extends BasePage {
   async setItemsPerPage(count: number): Promise<void> {
     await this.itemsPerPageSelect.selectOption(String(count));
   }
+
+  /** Reloads the list so it is rendered again from the current article total. */
+  async reload(): Promise<void> {
+    await this.page.reload();
+    await this.articleTitles.first().waitFor();
+  }
 }

@@ -8,4 +8,9 @@ export abstract class BasePage {
   async navigate(path: string = '/'): Promise<void> {
     await this.page.goto(path);
   }
+
+  /** Path of the current URL (e.g. `/welcome`), so specs can check where the user is without `page`. */
+  currentPath(): string {
+    return new URL(this.page.url()).pathname;
+  }
 }

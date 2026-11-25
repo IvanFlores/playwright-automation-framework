@@ -19,3 +19,13 @@ export const users = {
 export const loginMessages = {
   invalidCredentials: 'Invalid username or password',
 } as const;
+
+/** Pages involved in signing in (GAD 2.9.0). */
+export const authPaths = {
+  login: '/login/',
+  /** Landing page after a valid login. */
+  welcome: '/welcome',
+} as const;
+
+/** Greeting GAD shows to a signed-in user. */
+export const greetingFor = (email: string): string => `Hi ${email}!`;
