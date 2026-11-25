@@ -1,0 +1,15 @@
+
+Running 10 tests using 4 workers
+
+  ok  3 [chromium] › tests\ui\smoke\articles\TC8-search-api-created-article.spec.ts:5:7 › Articles › TC8: finds an article created through the API by searching its title @smoke @mutates-data (1.6s)
+  ok  4 [chromium] › tests\ui\smoke\articles\TC8-search-api-created-article.spec.ts:5:7 › Articles › TC8: finds an article created through the API by searching its title @smoke @mutates-data (2.0s)
+  ok  1 [chromium] › tests\ui\regression\comments\TC9-article-shows-api-created-comment.spec.ts:9:7 › Comments › TC9: shows a comment created through the API on its article page @regression @mutates-data (2.5s)
+  ok  2 [chromium] › tests\ui\regression\comments\TC9-article-shows-api-created-comment.spec.ts:9:7 › Comments › TC9: shows a comment created through the API on its article page @regression @mutates-data (2.5s)
+  ok  6 [chromium] › tests\ui\smoke\articles\TC8-search-api-created-article.spec.ts:5:7 › Articles › TC8: finds an article created through the API by searching its title @smoke @mutates-data (1.8s)
+  ok  5 [chromium] › tests\ui\regression\comments\TC9-article-shows-api-created-comment.spec.ts:9:7 › Comments › TC9: shows a comment created through the API on its article page @regression @mutates-data (2.0s)
+  ok  7 [chromium] › tests\ui\smoke\articles\TC8-search-api-created-article.spec.ts:5:7 › Articles › TC8: finds an article created through the API by searching its title @smoke @mutates-data (1.9s)
+  ok  8 [chromium] › tests\ui\regression\comments\TC9-article-shows-api-created-comment.spec.ts:9:7 › Comments › TC9: shows a comment created through the API on its article page @regression @mutates-data (2.1s)
+  ok 10 [chromium] › tests\ui\smoke\articles\TC8-search-api-created-article.spec.ts:5:7 › Articles › TC8: finds an article created through the API by searching its title @smoke @mutates-data (1.0s)
+  ok  9 [chromium] › tests\ui\regression\comments\TC9-article-shows-api-created-comment.spec.ts:9:7 › Comments › TC9: shows a comment created through the API on its article page @regression @mutates-data (1.0s)
+
+  10 passed (10.7s)

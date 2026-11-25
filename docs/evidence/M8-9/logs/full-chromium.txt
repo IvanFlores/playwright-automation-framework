@@ -1,0 +1,14 @@
+
+Running 9 tests using 4 workers
+
+  ok 3 [chromium] › tests\ui\regression\articles\TC6-search-no-results.spec.ts:6:7 › Articles › TC6: shows a no-data message when the search matches no article @regression @read-only (1.4s)
+  ok 4 [chromium] › tests\ui\regression\login\TC2-login-invalid-credentials.spec.ts:6:7 › Login › TC2: shows an error and stays signed out with invalid credentials @regression @read-only (1.6s)
+  ok 2 [chromium] › tests\ui\regression\articles\TC7-articles-items-per-page.spec.ts:10:7 › Articles › TC7: limits the list to the selected number of items per page @regression @read-only (2.0s)
+  ok 1 [chromium] › tests\ui\regression\comments\TC9-article-shows-api-created-comment.spec.ts:9:7 › Comments › TC9: shows a comment created through the API on its article page @regression @mutates-data (2.3s)
+  ok 6 [chromium] › tests\ui\smoke\articles\TC8-search-api-created-article.spec.ts:5:7 › Articles › TC8: finds an article created through the API by searching its title @smoke @mutates-data (1.2s)
+  ok 7 [chromium] › tests\ui\smoke\home\TC3-home-user-greeting.spec.ts:6:7 › Home › TC3: shows the signed-in user greeting @smoke @read-only (1.3s)
+  ok 8 [chromium] › tests\ui\smoke\home\TC4-home-user-menu.spec.ts:5:7 › Home › TC4: shows the user menu button to a signed-in user @smoke @read-only (1.1s)
+  ok 9 [chromium] › tests\ui\smoke\login\TC1-valid-login.spec.ts:6:7 › Login › TC1: greets the user by email after a valid login @smoke @read-only (937ms)
+  ok 5 [chromium] › tests\ui\smoke\articles\TC5-articles-list-pagination.spec.ts:11:7 › Articles › TC5: lists articles starting on the first page @smoke @read-only (2.8s)
+
+  9 passed (5.8s)
