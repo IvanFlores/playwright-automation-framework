@@ -20,6 +20,7 @@ and document what they found and what had to change.
 | 3. Prompt iteration | [`06-prompt-iteration.md`](06-prompt-iteration.md) |
 | Spec files (TC specifications) | [`docs/test-cases/gad/articles-test-cases.md`](../../test-cases/gad/articles-test-cases.md) · [`docs/test-cases/gad/comments-test-cases.md`](../../test-cases/gad/comments-test-cases.md) |
 | Test execution (HTML report, Chromium) | [`07-test-execution.md`](07-test-execution.md) |
+| Follow-up: TC1–TC7 migrated to specifications | [`08-tc1-tc7-spec-migration.md`](08-tc1-tc7-spec-migration.md) |
 
 ## The process, phase by phase (one commit per phase)
 

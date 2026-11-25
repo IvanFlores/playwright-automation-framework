@@ -25,6 +25,7 @@ type Fixtures = {
   articlesPage: ArticlesPage;
   articlePage: ArticlePage;
   postController: PostController;
+  articleController: ArticleController;
   createdArticle: Article;
   createdComment: Comment;
 };
@@ -102,6 +103,12 @@ export const test = base.extend<Fixtures, WorkerFixtures>({
   // Controller fixture for the `api` project (JSONPlaceholder, read/echo only — nothing to clean up).
   postController: async ({ request }, use) => {
     await use(new PostController(new ApiClient(request)));
+  },
+
+  // Read-only discovery of GAD articles (no token, nothing created): expected values and
+  // verifiable preconditions for TC5–TC7 (spec-data-standard M4 "API discovery").
+  articleController: async ({ request }, use) => {
+    await use(new ArticleController(new ApiClient(request)));
   },
 
   // Identity owned by this worker (spec-data-standard R1): no other worker creates data as this user.

@@ -9,6 +9,11 @@ export class ArticleController {
     return this.client.get<Article[]>(ArticlesEndpoints.base);
   }
 
+  /** Articles whose title or body contains `term` (the same search the list page uses). */
+  async search(term: string): Promise<Article[]> {
+    return this.client.get<Article[]>(ArticlesEndpoints.base, { q: term });
+  }
+
   async getById(id: number): Promise<Article> {
     return this.client.get<Article>(ArticlesEndpoints.byId(id));
   }
