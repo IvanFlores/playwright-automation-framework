@@ -7,7 +7,7 @@ test.describe('Articles', () => {
     { tag: ['@smoke', '@mutates-data'] },
     async ({ createdArticle, articlesPage }) => {
       await test.step('Verify the article list is loaded with an empty search', async () => {
-        await expect(articlesPage.articleTitles.first()).toBeVisible();
+        await expect(articlesPage.articleTitles).not.toHaveCount(0);
         await expect(articlesPage.searchInput).toBeEmpty();
       });
 

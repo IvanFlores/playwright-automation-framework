@@ -18,6 +18,8 @@ export default defineConfig({
 
   use: {
     baseURL: Env.baseUrl,
+    // Test-id contract of GAD (ADR-005): getByTestId() is locator tier 1 when the element carries it.
+    testIdAttribute: 'data-testid',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
