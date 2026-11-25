@@ -29,8 +29,11 @@ automatable.
 
 - TC specifications live in `docs/test-cases/gad/{feature}-test-cases.md` (one file per feature, one
   `###` section per TC). The README "Test cases" table is only the index.
-- Current scope: **TC8** (`articles-test-cases.md`) and **TC9** (`comments-test-cases.md`). TC1–TC7
-  have no specification document yet — report them as `not migrated`, never as violations.
+- Files: `login-test-cases.md` (TC1, TC2) · `home-test-cases.md` (TC3, TC4) ·
+  `articles-test-cases.md` (TC5–TC8) · `comments-test-cases.md` (TC9). A TC listed in the README
+  index without a section is reported as `not migrated`, never as a violation.
+- Read-only TCs that depend on a total other TCs change in parallel (e.g. the article count while
+  TC8/TC9 run) must state that dependency (Q10) and read the value in the same step as the check.
 - A specification is **ready** when another engineer (or an agent) can automate it without asking a
   single question.
 - **Oracle**: the exact expected result a step is compared against. A step without an exact,
@@ -125,7 +128,7 @@ Triggers: "assess test cases" · "tc spec review" · "spec requirements"
 File: docs/test-cases/gad/<feature>-test-cases.md
 TC8   <score>%  <grade>   top gaps: Q4, Q6, Q12
 TC9   <score>%  <grade>   top gaps: Q3, Q9, Q13
-Not migrated: TC1–TC7
+Not migrated: <TC ids, or "none">
 Average: <score>%   Ready: <n>/<total>
 Most frequent gaps: Q6 (<n>) · Q9 (<n>) · Q3 (<n>)
 Recommended next mode: M2 on <lowest-score TC>

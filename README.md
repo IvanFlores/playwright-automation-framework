@@ -29,7 +29,7 @@ tests/
   api/                 # API-only specs (api project)
   setup/auth.setup.ts  # optional login-once storageState setup
 scripts/orphan-check.ts  # `npm run data:orphans` — leftover test data in GAD
-docs/test-cases/gad/   # TC specifications (spec-requirements-standard) — TC8, TC9
+docs/test-cases/gad/   # TC specifications (spec-requirements-standard) — TC1–TC9
 docs/prompts/          # course prompts (original + adapted overrides)
 docs/decisions/        # ADRs (required before adding a hub mode)
 docs/evidence/         # skill execution reports and screenshots
@@ -41,13 +41,13 @@ docs/evidence/         # skill execution reports and screenshots
 
 | TC | Suite | Feature | Verifies |
 |---|---|---|---|
-| TC1 | smoke | login | valid login greets the user by email |
-| TC2 | regression | login | invalid credentials show an error, user stays signed out |
-| TC3 | smoke | home | signed-in greeting on the landing page |
-| TC4 | smoke | home | user menu button for a signed-in user |
-| TC5 | smoke | articles | article list renders, pagination starts on page 1 |
-| TC6 | regression | articles | search with no match shows "No data" |
-| TC7 | regression | articles | "Items/Page" limits the list size |
+| TC1 | smoke | login | valid login greets the user by email — [spec](docs/test-cases/gad/login-test-cases.md) |
+| TC2 | regression | login | invalid credentials show an error, user stays signed out — [spec](docs/test-cases/gad/login-test-cases.md) |
+| TC3 | smoke | home | signed-in greeting on the landing page — [spec](docs/test-cases/gad/home-test-cases.md) |
+| TC4 | smoke | home | user menu button for a signed-in user — [spec](docs/test-cases/gad/home-test-cases.md) |
+| TC5 | smoke | articles | article list renders, pagination starts on page 1 — [spec](docs/test-cases/gad/articles-test-cases.md) |
+| TC6 | regression | articles | search with no match shows "No data" — [spec](docs/test-cases/gad/articles-test-cases.md) |
+| TC7 | regression | articles | "Items/Page" limits the list size — [spec](docs/test-cases/gad/articles-test-cases.md) |
 | TC8 | smoke | articles | search finds an article created through the API (pre/postcondition via API) — [spec](docs/test-cases/gad/articles-test-cases.md) |
 | TC9 | regression | comments | article page shows a comment created through the API (pre/postconditions via API) — [spec](docs/test-cases/gad/comments-test-cases.md) |
 
