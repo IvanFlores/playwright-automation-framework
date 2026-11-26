@@ -1,6 +1,6 @@
 ---
 name: automation-architect
-description: 'Hub skill that orchestrates pom-architect, test-standards, spec-standards, lifecycle-architect, spec-requirements-standard, spec-data-standard and git-standards for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, to check structure only, to scaffold new Page Objects, fixtures, and spec files following all agreed patterns, to validate / run the git workflow, to scaffold API-based setup/teardown (lifecycle infrastructure), or to review TC quality (specification + test data robustness). Triggers: "apply architecture", "aplicar arquitectura", "full review", "check structure", "revisar estructura", "scaffold", "generar", "new page object", "check git", "verify commits", "git conventions", "git workflow", "commit push PR", "create PR", "setup api layer", "scaffold api", "new controller", "add lifecycle support", "lifecycle architect", "tc quality review", "assess test cases", "refine test case", "automation readiness", "assess test data", "data robustness", "parallel safe", "multi environment", "verify robustness". Invoke sub-skills independently for targeted checks.'
+description: 'Hub skill that orchestrates pom-architect, ui-locator-wait-standard, test-standards, spec-standards, lifecycle-architect, spec-requirements-standard, spec-data-standard and git-standards for Playwright + TypeScript projects. Use for full architecture enforcement (review + auto-fix) on existing files, to check structure only, to scaffold new Page Objects, fixtures, and spec files following all agreed patterns, to validate / run the git workflow, to scaffold API-based setup/teardown (lifecycle infrastructure), or to review TC quality (specification, test data robustness, locators and waits). Triggers: "apply architecture", "aplicar arquitectura", "full review", "check structure", "revisar estructura", "scaffold", "generar", "new page object", "check git", "verify commits", "git conventions", "git workflow", "commit push PR", "create PR", "setup api layer", "scaffold api", "new controller", "add lifecycle support", "lifecycle architect", "tc quality review", "assess test cases", "refine test case", "automation readiness", "assess test data", "data robustness", "parallel safe", "multi environment", "verify robustness", "assess locators", "review locators", "fix waits", "strict mode violation", "polling", "verify interactions", "flaky interaction". Invoke sub-skills independently for targeted checks.'
 ---
 
 # automation-architect (hub)
@@ -15,6 +15,7 @@ Orchestrates the rule skills of this project:
 | `lifecycle-architect` | `.claude/skills/lifecycle-architect/SKILL.md` | API layer + setup/teardown rules R1–R8, R10, R11 (`src/api/**`, lifecycle fixtures, spec injection) — added M6 |
 | `spec-requirements-standard` | `.claude/skills/spec-requirements-standard/SKILL.md` | TC specification Q1–Q13 · M0–M4 (`docs/test-cases/**/*.md`) — added M7 |
 | `spec-data-standard` | `.claude/skills/spec-data-standard/SKILL.md` | Test data R1–R15 · M0–M5: classification · isolation · sourcing · environments · expected values (`src/data/**` · `src/config/**` · `src/fixtures/**` · `playwright.config.ts` · `tests/**/*.spec.ts`) — added M7 |
+| `ui-locator-wait-standard` | `.claude/skills/ui-locator-wait-standard/SKILL.md` | Locator strategy · uniqueness · action semantics · waits · polling · timeouts R1–R20 · M0–M6 (lifecycle phases 3 Act · 5 Run) — added M8-9 |
 | `git-standards` | `.claude/skills/git-standards/SKILL.md` | Git workflow conventions C1–C4 + execute E1–E5 (Mode 4 only) |
 
 **The hub does not duplicate their rules.** For each pipeline step it loads the sub-skill's
@@ -38,6 +39,10 @@ For a targeted check (one rule family only), invoke the sub-skill directly inste
 | Upgrade an incomplete TC / prepare it for automation | `spec-requirements-standard` | "refine test case TC8" / "automation readiness TC8" |
 | Assess test data maturity / make tests safe in parallel | `spec-data-standard` | "assess test data" / "parallel safe" |
 | Verify robustness with evidence | `spec-data-standard` | "verify robustness" |
+| Assess locator and wait maturity | `ui-locator-wait-standard` | "assess locators" |
+| Fix fragile locators / strict-mode violations | `ui-locator-wait-standard` | "review locators" |
+| Replace fixed waits / add bounded polling | `ui-locator-wait-standard` | "fix waits" |
+| Prove interactions are stable with evidence | `ui-locator-wait-standard` | "verify interactions" |
 
 ---
 
@@ -61,6 +66,22 @@ For a targeted check (one rule family only), invoke the sub-skill directly inste
   `src/config/Env.ts` (environment selection and validation).
 - Path aliases are the only allowed import style — relative paths are always a violation
   (see `test-standards` rule 1 for the only exceptions).
+
+### Locators and waits (`ui-locator-wait-standard`, ADR-005)
+
+| File / scope | Owner | Concern |
+|---|---|---|
+| `src/ui/pages/**` · `src/ui/components/**` — locator expression and actions | `ui-locator-wait-standard` | R1–R12 (PO *structure* stays with `pom-architect`) |
+| `tests/**/*.spec.ts` — waits and synchronisation | `ui-locator-wait-standard` | R13–R16 |
+| `tests/**/*.spec.ts` · `src/fixtures/**` — polling and timeouts | `ui-locator-wait-standard` | R17–R20 |
+| `playwright.config.ts` — test-id contract (`testIdAttribute`), timeout layers | `ui-locator-wait-standard` | R1, R19 |
+
+- Execution order: right after `pom-architect` (locators are judged once the PO structure is
+  correct), before spec-level checks.
+- Changing `testIdAttribute` or global timeouts in `playwright.config.ts` → re-run R1 / R19 and
+  update the `pom-architect` getter examples.
+- Depends on Playwright `getByTestId` (string or RegExp), `getByAltText`, `getByTitle`,
+  `pressSequentially` (≥ 1.38, replaces `type`), `expect.poll` / `toPass` `timeout` + `intervals`.
 
 ---
 
@@ -93,7 +114,7 @@ For a targeted check (one rule family only), invoke the sub-skill directly inste
 | 3 | Scaffold new file | Generation of PO + fixture + spec | Active (M4) |
 | 4 | Git workflow | Git conventions (validate + execute) | Active (M5) — `docs/decisions/ADR-001-git-workflow-mode.md` |
 | 5 | Lifecycle infrastructure | API layer scaffold for setup/teardown | Active (M6) — `docs/decisions/ADR-002-lifecycle-infrastructure-mode.md` |
-| 6 | TC quality review | TC lifecycle phases: specification + test data robustness | Active (M7) — `docs/decisions/ADR-003-tc-quality-review-mode.md` |
+| 6 | TC quality review | TC lifecycle phases: specification · test data robustness · locators and waits | Active (M7; phases 3/5 extended M8-9, `ADR-005`) — `docs/decisions/ADR-003-tc-quality-review-mode.md` |
 
 Current total: **6 / 10** modes (see Hub Growth Policy, Rule 4).
 
@@ -116,18 +137,21 @@ Steps:
    `src/helpers/**`, `src/api/**`. If the user named specific files, limit the run to those plus the
    Page Objects / fixtures they depend on.
 2. Apply `pom-architect` — load its SKILL.md, detect + auto-fix all POM violations.
-3. Apply `test-standards` — load its SKILL.md, detect + auto-fix all test writing violations.
-4. Apply `spec-standards` — load its SKILL.md, detect + auto-fix all spec organisation violations
+3. Apply `ui-locator-wait-standard` (M1–M5 rules) on Page Objects, specs, fixtures and config:
+   auto-fix R1 (test-id contract), R9, R11, R13, R15, R16, R20; collect R1–R8, R10, R12, R14,
+   R17–R19 as manual fixes.
+4. Apply `test-standards` — load its SKILL.md, detect + auto-fix all test writing violations.
+5. Apply `spec-standards` — load its SKILL.md, detect + auto-fix all spec organisation violations
    (folder / file name / TC ID / `test.step()`).
-5. Apply `lifecycle-architect` (Mode Review) on `src/api/**`, `src/fixtures/index.ts` (lifecycle
+6. Apply `lifecycle-architect` (Mode Review) on `src/api/**`, `src/fixtures/index.ts` (lifecycle
    concerns only) and `tests/**/*.spec.ts` (R2, R7): auto-fix R1–R3, R5–R8, R11; collect R4 and R10
    as manual fixes.
-6. Apply `spec-data-standard` (R1–R15) on fixtures, data, config, `playwright.config.ts` and specs:
+7. Apply `spec-data-standard` (R1–R15) on fixtures, data, config, `playwright.config.ts` and specs:
    auto-fix R2, R3, R6–R9, R11; collect R1, R4, R5, R10, R12–R15 as manual fixes.
-7. Re-scan once (all code skills, detection only) to confirm no violation was introduced by the
+8. Re-scan once (all code skills, detection only) to confirm no violation was introduced by the
    fixes. Newly introduced violations are fixed if mechanical, otherwise added to the manual list.
    Do not loop more than once.
-8. Output unified summary.
+9. Output unified summary.
 
 `git-standards` is **not** part of Mode 1 (it inspects git state, not code) — use Mode 4.
 
@@ -137,6 +161,7 @@ Output:
 [automation-architect] PIPELINE COMPLETE
 ─────────────────────────────────────────
 pom-architect:    X violations found — Y auto-applied
+ui-locator-wait-standard: X violations found — Y auto-applied
 test-standards:   X violations found — Y auto-applied
 spec-standards:   X violations found — Y auto-applied
 lifecycle-architect: X violations found — Y auto-applied
@@ -186,7 +211,9 @@ Steps:
 1. Ask (only for what cannot be inferred from context): page name, URL path, locators, requires
    authentication?
 2. Generate `src/ui/pages/<Name>Page.ts` extending `BasePage` — only getters and action methods, no
-   constructor, no `navigate()`, no `expect()`.
+   constructor, no `navigate()`, no `expect()`. Getters follow the `ui-locator-wait-standard` R1
+   hierarchy for the resolved test-id contract and use only values observed in the DOM; an
+   ambiguous or unverified locator is generated with `// TODO: verify locator in DOM` (R4).
 3. Register the fixture in `src/fixtures/index.ts` following `test-standards` rule 4:
    - No auth → `async ({ page }, use)` → create PO, `navigate('<path>')`, `use()`
    - Auth required → `async ({ page, authenticatedPage }, use)` → create PO with `page`,
@@ -311,7 +338,8 @@ Load `lifecycle-architect` directly for standalone API layer work without activa
 
 Triggered by: "tc quality review", "assess test cases", "refine test case", "write test case",
 "tc coverage", "automation readiness", "assess test data", "data robustness", "parallel safe",
-"multi environment", "verify robustness".
+"multi environment", "verify robustness", "review locators", "fix waits", "assess locators",
+"strict mode violation", "polling", "verify interactions", "flaky interaction".
 
 Routes the TC lifecycle phases to their owners (no rules here):
 
@@ -319,16 +347,20 @@ Routes the TC lifecycle phases to their owners (no rules here):
 |---|---|
 | 1. Specify | `spec-requirements-standard` M0–M4 |
 | 2. Arrange | `spec-data-standard` M1–M3 · `lifecycle-architect` Add (missing controllers) |
-| 3. Act | Mode 3 (PO / fixture / spec) · `pom-architect` |
+| 3. Act | Mode 3 (PO / fixture / spec) · `pom-architect` · `ui-locator-wait-standard` M0–M5 |
 | 4. Assert | `spec-data-standard` M4 |
-| 5. Run | `spec-data-standard` M5 |
+| 5. Run | `spec-data-standard` M5 · `ui-locator-wait-standard` M6 |
 
 Steps:
 
 1. Pick the phase from the wording (specification words → phase 1; data / parallel / environment
    words → phases 2–5). With no hint, run phase 1 M0 then `spec-data-standard` M0 (both read-only).
+   Locator and wait triggers → phase 3 Act (M0–M5) and phase 5 Run (M6), `ui-locator-wait-standard`.
 2. Load the skill, run the mode, forward its output verbatim.
 3. When phase 1 produces an M4 handoff, pass it as the input of `spec-data-standard`.
+
+Note: the orchestrator coordinates `pom-architect` (POM structure), `ui-locator-wait-standard`
+(locators and waits) and `lifecycle-architect` (teardown).
 
 ---
 

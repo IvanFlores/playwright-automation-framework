@@ -235,7 +235,7 @@ Severity: **ERROR** (weight 3) blocks *Ready*; **WARNING** (weight 1) lowers the
 | Q3 | `PRECONDITIONS_PROVISIONED` | ERROR | A precondition has no "provisioned by" or no scope ("user is logged in") | Add method (API/fixture/mock/UI) and scope |
 | Q4 | `TEST_DATA_DECLARED` | ERROR | Values inline in steps, marked "e.g.", static values for unique fields, or secrets written in clear | Move to the data table with class and source; unique → generation rule; secrets → env reference |
 | Q5 | `ONE_ACTION_PER_STEP` | WARNING | A step has several actions, or an action has no expected result | Split; one action, one oracle |
-| Q6 | `EXACT_ORACLE` | ERROR | Oracle checks presence only ("visible", "non-empty", "at least one", "contains") when a value is knowable | State the exact value or the data item it equals |
+| Q6 | `EXACT_ORACLE` | ERROR | Oracle checks presence only ("visible", "non-empty", "at least one", "contains") when a value is knowable | State the exact value or the data item it equals. An asynchronous step names its terminal state and its failure states (input for `ui-locator-wait-standard` R14 · R18) |
 | Q7 | `DETERMINISTIC_ORACLE` | ERROR | Oracle contains "or", "e.g.", "should", "some", "any", or another alternative outcome | Choose the single correct outcome; if unknown → `TBD:` |
 | Q8 | `VERIFIABLE_ORACLE` | ERROR | Oracle needs a reference that does not exist ("only that article" without a unique, known title) | Add the reference: dataset, mock, created data, or API discovery |
 | Q9 | `POSTCONDITIONS_DEFINED` | ERROR | TC creates, changes, or deletes data and no postcondition or cleanup scope is stated | Add the final state and scoped cleanup |

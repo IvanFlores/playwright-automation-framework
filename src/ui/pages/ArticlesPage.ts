@@ -4,7 +4,7 @@ import { BasePage } from '@pages/BasePage';
 export class ArticlesPage extends BasePage {
   /** Title of every article card currently rendered (`article-<id>-title`). */
   get articleTitles() {
-    return this.page.locator('[data-testid^="article-"][data-testid$="-title"]');
+    return this.page.getByTestId(/^article-\d+-title$/);
   }
 
   get searchInput() {
